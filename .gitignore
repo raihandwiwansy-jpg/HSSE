@@ -1,0 +1,32 @@
+# General
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+
+# Backend (be)
+be/vendor/
+be/.env
+be/.env.*
+be/storage/
+be/public/storage/
+be/bootstrap/cache/
+be/node_modules/
+be/*.log
+be/.phpunit.cache
+be/.idea/
+be/.vscode/
+be/*.cache
+
+# Frontend (fe)
+fe/node_modules/
+fe/.next/
+fe/out/
+fe/build/
+fe/dist/
+fe/.env
+fe/.env.*
+fe/*.log
+fe/.vercel/
+fe/.cache/
+fe/.turbo/
