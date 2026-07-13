@@ -191,9 +191,16 @@ export interface DashboardSummary {
   gwp: PermitStatusCounts;
   hwp: PermitStatusCounts;
   cse: PermitStatusCounts;
-  insiden: { total: number; pending: number };
+  insiden: {
+    total: number;
+    pending: number;
+    kecelakaan?: number;
+    near_miss?: number;
+    unsafe_condition?: number;
+  };
   need_action: number;
   total_permits: number;
+  total_manhours?: number;
 }
 
 export interface DashboardStats {
@@ -224,6 +231,7 @@ export interface PerformanceBoard {
   bulan_ini: number[];
   bulan_lalu: number[];
   tanggal: number[];
+  trend_data?: any[];
 }
 
 export interface PaginatedResponse<T> {

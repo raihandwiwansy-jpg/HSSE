@@ -79,6 +79,16 @@ const statusConfig: Record<string, { label: string; color: string; icon: React.R
     color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
     icon: <Clock className="h-3.5 w-3.5" />,
   },
+  investigation: {
+    label: 'Dalam Penyelidikan',
+    color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+    icon: <Shield className="h-3.5 w-3.5" />,
+  },
+  resolved: {
+    label: 'Selesai',
+    color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+    icon: <CheckCircle className="h-3.5 w-3.5" />,
+  },
   cold_work: {
     label: 'Cold Work',
     color: 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400',

@@ -23,6 +23,8 @@ import {
   X,
   ClipboardCheck,
   Activity,
+  ShieldAlert,
+  Clock,
 } from 'lucide-react';
 
 interface SubMenuItem {
@@ -43,6 +45,8 @@ export const useSidebar = () => useContext(SidebarContext);
 const mainMenus = [
   { label: 'Dashboard', icon: <LayoutDashboard size={20} />, href: '/dashboard', roles: ['admin', 'user', 'supervisor'] },
   { label: 'Permit / Izin Kerja', icon: <FileText size={20} />, href: '/permit', roles: ['admin', 'user', 'supervisor'] },
+  { label: 'Insiden', icon: <ShieldAlert size={20} />, href: '/insiden', roles: ['admin', 'user'] },
+  { label: 'Man Hours', icon: <Clock size={20} />, href: '/man-hours', roles: ['admin', 'user'] },
   { label: 'Safety Patrol', icon: <ClipboardCheck size={20} />, href: '/safety-patrol', roles: ['admin', 'user'] },
   { label: 'Safety Behavior', icon: <Activity size={20} />, href: '/safety-behavior', roles: ['admin', 'user'] },
   { label: 'HSSE KPI Performance', icon: <BarChart3 size={20} />, href: '/hse-kpi-performance', roles: ['admin'] },
@@ -118,19 +122,6 @@ export default function Sidebar({ children }: { children?: React.ReactNode }) {
           <ChevronLeft size={14} className={`text-gray-500 transition-transform duration-300 ${isCollapsed ? 'rotate-180' : ''}`} />
         </button>
 
-        {/* Header */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-600 to-blue-700">
-          <div className={`flex items-center gap-3 ${isCollapsed ? 'justify-center' : ''}`}>
-            <div className="w-10 h-10 flex items-center justify-center shrink-0">
-              <img src="/Picture1.png" alt="Logo HSSE" className="w-full h-full object-contain drop-shadow-[0_1px_3px_rgba(0,0,0,0.3)]" />
-            </div>
-            {!isCollapsed && (
-              <div className="text-white min-w-0">
-                <p className="text-xs font-semibold opacity-90 truncate">PT Industri Nabati Lestari</p>
-              </div>
-            )}
-          </div>
-        </div>
 
         {/* User Info */}
         {!isCollapsed && (

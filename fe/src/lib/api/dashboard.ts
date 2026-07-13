@@ -19,3 +19,7 @@ export const getPerformanceBoard = () => {
 export const getAdminDashboard = () => {
   return api.get('/admin/dashboard');
 };
+
+export const getDashboardRoleData = () => {
+  return api.get('/dashboard/role-data');
+};

@@ -68,6 +68,9 @@ class DashboardController extends Controller
         // Insiden
         $insidenTotal    = (clone $insidenQ)->count();
         $insidenPending  = (clone $insidenQ)->where('status', 'pending')->count();
+        $insidenKecelakaan = (clone $insidenQ)->where('jenis', 'kecelakaan')->count();
+        $insidenNearMiss = (clone $insidenQ)->where('jenis', 'near_miss')->count();
+        $insidenUnsafeCondition = (clone $insidenQ)->where('jenis', 'unsafe_condition')->count();
 
         // Role-specific "need action" counts
         $needAction = 0;
@@ -81,6 +84,8 @@ class DashboardController extends Controller
             // User: pending submission (drafts) + rejected (need resubmit)
             $needAction = $gwpDraft + $hwpDraft + $cseDraft + $gwpRejected + $hwpRejected + $cseRejected;
         }
+
+        $totalManhours = \App\Models\ManHoursLog::sum('jumlah_jam');
 
         return $this->success([
             'role' => $role,
@@ -114,9 +119,13 @@ class DashboardController extends Controller
             'insiden' => [
                 'total' => $insidenTotal,
                 'pending' => $insidenPending,
+                'kecelakaan' => $insidenKecelakaan,
+                'near_miss' => $insidenNearMiss,
+                'unsafe_condition' => $insidenUnsafeCondition,
             ],
             'need_action' => $needAction,
             'total_permits' => $gwpTotal + $hwpTotal + $cseTotal,
+            'total_manhours' => (int) $totalManhours,
         ], 'Dashboard summary berhasil diambil');
     }
 
@@ -196,7 +205,7 @@ class DashboardController extends Controller
 
         $hariKerjaBulanIni = now()->day;
 
-        $totalManhours = $hariKerjaBulanIni * 8 * Karyawan::count();
+        $totalManhours = (int) \App\Models\ManHoursLog::sum('jumlah_jam');
         $totalKaryawan = Karyawan::count();
 
         $lastAccident = Insiden::where('jenis', 'kecelakaan')
@@ -444,4 +453,233 @@ class DashboardController extends Controller
             'recent_insiden' => $recentInsiden,
         ], 'Dashboard data berhasil diambil');
     }
+
+    /**
+     * Get real-time dashboard data per role
+     */
+    public function roleData(Request $request)
+    {
+        $user = $request->user();
+        $role = $user->role;
+
+        // Generate list of 12 months for the current calendar year (Y-m format)
+        $year = now()->format('Y');
+        $months = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $months[] = sprintf("%s-%02d", $year, $m);
+        }
+
+        $monthNames = [
+            '01' => 'Jan', '02' => 'Feb', '03' => 'Mar', '04' => 'Apr',
+            '05' => 'Mei', '06' => 'Jun', '07' => 'Jul', '08' => 'Agu',
+            '09' => 'Sep', '10' => 'Okt', '11' => 'Nov', '12' => 'Des'
+        ];
+
+        // 1. Initialize stats & charts
+        $stats = [
+            'total_manpower' => null,
+            'safe_man_hours' => null,
+            'total_incident' => null,
+            'near_miss' => null,
+        ];
+
+        $incidentSummary = [
+            ['name' => 'Kecelakaan Kerja', 'value' => 0],
+            ['name' => 'Near Miss', 'value' => 0],
+            ['name' => 'Unsafe Condition', 'value' => 0]
+        ];
+
+        $ptwStatus = [
+            ['name' => 'Draft', 'value' => 0],
+            ['name' => 'Submitted', 'value' => 0],
+            ['name' => 'Approved', 'value' => 0],
+            ['name' => 'Rejected', 'value' => 0],
+            ['name' => 'Completed', 'value' => 0]
+        ];
+
+        $safetyInspectionTrends = [];
+        $trainingSafetyBehavior = [];
+
+        // Pre-populate charts with empty 12-month data
+        foreach ($months as $m) {
+            $parts = explode('-', $m);
+            $monthLabel = $monthNames[$parts[1]];
+
+            $safetyInspectionTrends[] = [
+                'month' => $monthLabel,
+                'inspeksi' => 0
+            ];
+
+            $trainingSafetyBehavior[] = [
+                'month' => $monthLabel,
+                'safety_behavior' => 0,
+                'training' => 0
+            ];
+        }
+
+        if ($role === 'admin') {
+            // ADMIN DATA
+            $stats['total_manpower'] = Karyawan::count();
+            $stats['safe_man_hours'] = (float) \App\Models\ManHour::where('status', 'completed')->sum('durasi_jam');
+            $stats['total_incident'] = Insiden::count();
+            $stats['near_miss'] = Insiden::where('jenis', 'near_miss')->count();
+
+            $incidentSummary = [
+                ['name' => 'Kecelakaan Kerja', 'value' => Insiden::where('jenis', 'kecelakaan')->count()],
+                ['name' => 'Near Miss', 'value' => $stats['near_miss']],
+                ['name' => 'Unsafe Condition', 'value' => Insiden::where('jenis', 'unsafe_condition')->count()]
+            ];
+
+            $ptwQuery = \App\Models\Permit::query();
+            $ptwStatus = [
+                ['name' => 'Draft', 'value' => (clone $ptwQuery)->where('status', 'draft')->count()],
+                ['name' => 'Submitted', 'value' => (clone $ptwQuery)->where('status', 'submitted')->count()],
+                ['name' => 'Approved', 'value' => (clone $ptwQuery)->whereIn('status', ['approved', 'hse_approved', 'supervisor_approved'])->count()],
+                ['name' => 'Rejected', 'value' => (clone $ptwQuery)->whereIn('status', ['rejected', 'hse_rejected', 'supervisor_rejected'])->count()],
+                ['name' => 'Completed', 'value' => (clone $ptwQuery)->where('status', 'completed')->count()]
+            ];
+
+            $safetyInspectionTrends = [];
+            foreach ($months as $m) {
+                $parts = explode('-', $m);
+                $monthLabel = $monthNames[$parts[1]];
+                $count = \App\Models\SafetyPatrol::where(DB::raw("DATE_FORMAT(tanggal, '%Y-%m')"), $m)->count();
+                $safetyInspectionTrends[] = [
+                    'month' => $monthLabel,
+                    'inspeksi' => $count
+                ];
+            }
+
+            $trainingSafetyBehavior = [];
+            foreach ($months as $m) {
+                $parts = explode('-', $m);
+                $monthLabel = $monthNames[$parts[1]];
+                $sbCount = \App\Models\SafetyBehavior::where(DB::raw("DATE_FORMAT(tanggal, '%Y-%m')"), $m)->count();
+                $kpiCount = \App\Models\HseKpiPerformance::where(DB::raw("DATE_FORMAT(period_start, '%Y-%m')"), $m)->sum('hse_training');
+                $trainingSafetyBehavior[] = [
+                    'month' => $monthLabel,
+                    'safety_behavior' => $sbCount,
+                    'training' => (int) $kpiCount
+                ];
+            }
+
+        } elseif ($role === 'user') {
+            // USER DATA (Own context)
+            $stats['total_manpower'] = null; // Displayed as '-'
+            $stats['safe_man_hours'] = (float) \App\Models\ManHour::where('user_id', $user->id)->where('status', 'completed')->sum('durasi_jam');
+            $stats['total_incident'] = Insiden::where('user_id', $user->id)->count();
+            $stats['near_miss'] = Insiden::where('user_id', $user->id)->where('jenis', 'near_miss')->count();
+
+            $incidentSummary = [
+                ['name' => 'Kecelakaan Kerja', 'value' => Insiden::where('user_id', $user->id)->where('jenis', 'kecelakaan')->count()],
+                ['name' => 'Near Miss', 'value' => $stats['near_miss']],
+                ['name' => 'Unsafe Condition', 'value' => Insiden::where('user_id', $user->id)->where('jenis', 'unsafe_condition')->count()]
+            ];
+
+            $ptwQuery = \App\Models\Permit::where('user_id', $user->id);
+            $ptwStatus = [
+                ['name' => 'Draft', 'value' => (clone $ptwQuery)->where('status', 'draft')->count()],
+                ['name' => 'Submitted', 'value' => (clone $ptwQuery)->where('status', 'submitted')->count()],
+                ['name' => 'Approved', 'value' => (clone $ptwQuery)->whereIn('status', ['approved', 'hse_approved', 'supervisor_approved'])->count()],
+                ['name' => 'Rejected', 'value' => (clone $ptwQuery)->whereIn('status', ['rejected', 'hse_rejected', 'supervisor_rejected'])->count()],
+                ['name' => 'Completed', 'value' => (clone $ptwQuery)->where('status', 'completed')->count()]
+            ];
+
+            $safetyInspectionTrends = [];
+            foreach ($months as $m) {
+                $parts = explode('-', $m);
+                $monthLabel = $monthNames[$parts[1]];
+                $count = \App\Models\SafetyPatrol::where(function($q) use ($user) {
+                    $q->where('user_id', $user->id)
+                      ->orWhere('observer', $user->name);
+                })->where(DB::raw("DATE_FORMAT(tanggal, '%Y-%m')"), $m)->count();
+                $safetyInspectionTrends[] = [
+                    'month' => $monthLabel,
+                    'inspeksi' => $count
+                ];
+            }
+
+            $trainingSafetyBehavior = [];
+            foreach ($months as $m) {
+                $parts = explode('-', $m);
+                $monthLabel = $monthNames[$parts[1]];
+                $sbCount = \App\Models\SafetyBehavior::where(function($q) use ($user) {
+                    $q->where('user_id', $user->id)
+                      ->orWhere('observer', $user->name);
+                })->where(DB::raw("DATE_FORMAT(tanggal, '%Y-%m')"), $m)->count();
+                $kpiCount = \App\Models\HseKpiPerformance::where('user_id', $user->id)
+                    ->where(DB::raw("DATE_FORMAT(period_start, '%Y-%m')"), $m)
+                    ->sum('hse_training');
+                $trainingSafetyBehavior[] = [
+                    'month' => $monthLabel,
+                    'safety_behavior' => $sbCount,
+                    'training' => (int) $kpiCount
+                ];
+            }
+
+        } elseif ($role === 'supervisor') {
+            // SUPERVISOR DATA
+            // Stats are not applicable for Supervisor
+            $stats['total_manpower'] = null;
+            $stats['safe_man_hours'] = null;
+            $stats['total_incident'] = null;
+            $stats['near_miss'] = null;
+
+            // Incident Summary is empty
+            $incidentSummary = [
+                ['name' => 'Kecelakaan Kerja', 'value' => 0],
+                ['name' => 'Near Miss', 'value' => 0],
+                ['name' => 'Unsafe Condition', 'value' => 0]
+            ];
+
+            // PTW Status filtered by supervisor's department
+            $ptwQuery = \App\Models\Permit::query();
+            if ($user->departemen) {
+                $ptwQuery->where('departemen', $user->departemen);
+            }
+            $ptwStatus = [
+                ['name' => 'Draft', 'value' => (clone $ptwQuery)->where('status', 'draft')->count()],
+                ['name' => 'Submitted', 'value' => (clone $ptwQuery)->where('status', 'submitted')->count()],
+                ['name' => 'Approved', 'value' => (clone $ptwQuery)->whereIn('status', ['approved', 'hse_approved', 'supervisor_approved'])->count()],
+                ['name' => 'Rejected', 'value' => (clone $ptwQuery)->whereIn('status', ['rejected', 'hse_rejected', 'supervisor_rejected'])->count()],
+                ['name' => 'Completed', 'value' => (clone $ptwQuery)->where('status', 'completed')->count()]
+            ];
+
+            // Trends and compliance are empty/zeroed out
+            $safetyInspectionTrends = [];
+            foreach ($months as $m) {
+                $parts = explode('-', $m);
+                $monthLabel = $monthNames[$parts[1]];
+                $safetyInspectionTrends[] = [
+                    'month' => $monthLabel,
+                    'inspeksi' => 0
+                ];
+            }
+
+            $trainingSafetyBehavior = [];
+            foreach ($months as $m) {
+                $parts = explode('-', $m);
+                $monthLabel = $monthNames[$parts[1]];
+                $trainingSafetyBehavior[] = [
+                    'month' => $monthLabel,
+                    'safety_behavior' => 0,
+                    'training' => 0
+                ];
+            }
+        } else {
+            return $this->error('Role tidak dikenali', 400);
+        }
+
+        return $this->success([
+            'role' => $role,
+            'stats' => $stats,
+            'charts' => [
+                'incident_summary' => $incidentSummary,
+                'ptw_status' => $ptwStatus,
+                'safety_inspection_trends' => $safetyInspectionTrends,
+                'training_safety_behavior' => $trainingSafetyBehavior,
+            ]
+        ], 'Dashboard data berhasil diambil');
+    }
 }
+

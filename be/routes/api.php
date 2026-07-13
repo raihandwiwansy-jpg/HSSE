@@ -23,6 +23,7 @@ use App\Http\Controllers\HseKpiController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\MasterDataController;
+use App\Http\Controllers\ManHoursController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -47,6 +48,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
     Route::get('/dashboard/chart', [DashboardController::class, 'chart']);
     Route::get('/dashboard/performance-board', [DashboardController::class, 'performanceBoard']);
+    Route::get('/dashboard/role-data', [DashboardController::class, 'roleData']);
 
     // Master Data
     Route::get('/master-data/seed', [MasterDataController::class, 'seedDefaults']);
@@ -91,6 +93,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // Insiden
     Route::apiResource('insiden', InsidenController::class);
     Route::patch('insiden/{id}/status', [InsidenController::class, 'updateStatus']);
+
+    // Man Hours
+    Route::apiResource('man-hours', ManHoursController::class)->parameters(['man-hours' => 'id']);
+    Route::patch('man-hours/{id}/status', [ManHoursController::class, 'updateStatus']);
 
     // GWP
     Route::apiResource('gwp', GwpController::class);
