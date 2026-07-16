@@ -27,6 +27,7 @@ return new class extends Migration
                 'supervisor_rejected',
                 'hse_approved',
                 'hse_rejected',
+                'work_ready',
                 'completed',
             ])->default('draft');
             $table->foreignId('jsa_id')->nullable()->constrained('jsa')->nullOnDelete();
