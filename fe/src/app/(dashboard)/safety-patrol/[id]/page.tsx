@@ -202,12 +202,15 @@ export default function SafetyPatrolDetailPage() {
       {p.foto && p.foto.length > 0 && (
         <DetailCard title="Dokumentasi Foto" icon={<Camera size={14} className="text-blue-500" />}>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            {p.foto.map((f, i) => (
-              <a key={i} href={`http://localhost:8000/storage/${f}`} target="_blank" rel="noopener noreferrer"
+            {p.foto.map((f, i) => {
+              const baseStorageUrl = process.env.NEXT_PUBLIC_API_URL ? process.env.NEXT_PUBLIC_API_URL.replace('/api', '') : 'http://localhost:8000';
+              return (
+              <a key={i} href={`${baseStorageUrl}/storage/${f}`} target="_blank" rel="noopener noreferrer"
                 className="block aspect-video rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
-                <img src={`http://localhost:8000/storage/${f}`} alt={`Foto ${i + 1}`} className="w-full h-full object-cover" />
+                <img src={`${baseStorageUrl}/storage/${f}`} alt={`Foto ${i + 1}`} className="w-full h-full object-cover" />
               </a>
-            ))}
+              )
+            })}
           </div>
         </DetailCard>
       )}

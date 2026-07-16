@@ -20,7 +20,7 @@ interface LoginResponse {
 
 export const login = async (email: string, password: string): Promise<LoginResponse> => {
   try {
-    console.log('Mengirim request login ke:', 'http://localhost:8000/api/login');
+    console.log('Mengirim request login ke:', (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api') + '/login');
     console.log('Data:', { email, password });
 
     const response = await axios.post('/login', { email, password });
@@ -43,7 +43,7 @@ export const login = async (email: string, password: string): Promise<LoginRespo
       console.error('No response from server:', error.request);
       throw {
         success: false,
-        message: 'Network Error - Pastikan backend berjalan di http://localhost:8000',
+        message: 'Network Error - Pastikan backend berjalan',
       };
     } else {
       console.error('Error:', error.message);

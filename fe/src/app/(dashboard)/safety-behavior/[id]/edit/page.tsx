@@ -265,7 +265,10 @@ export default function EditSafetyBehaviorPage() {
 
             <div className="bg-white dark:bg-gray-900 rounded-2xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm space-y-3">
               <h4 className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Dokumentasi Foto</h4>
-              {existingFoto.length > 0 && <div className="grid grid-cols-2 gap-2 mb-2">{existingFoto.map((f, i) => <div key={i} className="relative"><img src={`http://localhost:8000/storage/${f}`} alt={`Foto ${i + 1}`} className="w-full h-20 object-cover rounded-lg border border-gray-200 dark:border-gray-600" /></div>)}</div>}
+              {existingFoto.length > 0 && <div className="grid grid-cols-2 gap-2 mb-2">{existingFoto.map((f, i) => {
+                const baseStorageUrl = process.env.NEXT_PUBLIC_API_URL ? process.env.NEXT_PUBLIC_API_URL.replace('/api', '') : 'http://localhost:8000';
+                return <div key={i} className="relative"><img src={`${baseStorageUrl}/storage/${f}`} alt={`Foto ${i + 1}`} className="w-full h-20 object-cover rounded-lg border border-gray-200 dark:border-gray-600" /></div>
+              })}</div>}
               <div className="grid grid-cols-2 gap-2">
                 {fotoPreview.map((preview, idx) => (
                   <div key={idx} className="relative group">

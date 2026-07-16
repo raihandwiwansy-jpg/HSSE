@@ -3,7 +3,7 @@ export interface User {
   username: string;
   name: string;
   email: string;
-  role: 'admin' | 'user' | 'supervisor';
+  role: 'admin' | 'user' | 'supervisor' | 'kasubag' | 'audit';
   tempat_lahir?: string;
   tanggal_lahir?: string;
   no_hp?: string;
@@ -347,6 +347,8 @@ export interface SafetyPatrol {
   status: SafetyPatrolStatus;
   submitted_at?: string;
   reviewed_at?: string;
+  admin_status?: 'pending' | 'approved' | 'rejected';
+  audit_status?: 'pending' | 'approved' | 'rejected';
   created_at: string;
   updated_at: string;
   user?: User;
@@ -387,6 +389,8 @@ export interface SafetyBehavior {
   status: SafetyBehaviorStatus;
   submitted_at?: string;
   reviewed_at?: string;
+  admin_status?: 'pending' | 'approved' | 'rejected';
+  audit_status?: 'pending' | 'approved' | 'rejected';
   created_at: string;
   updated_at: string;
   user?: User;

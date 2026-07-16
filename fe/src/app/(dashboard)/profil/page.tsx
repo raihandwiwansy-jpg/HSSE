@@ -34,7 +34,8 @@ export default function ProfilePage() {
       const token = localStorage.getItem('token');
       const formData = new FormData();
       formData.append('photo', file);
-      const res = await fetch('http://localhost:8000/api/user/update-profile-photo', {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+      const res = await fetch(`${baseUrl}/user/update-profile-photo`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
         body: formData,
@@ -66,7 +67,8 @@ export default function ProfilePage() {
     setSaving(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:8000/api/user/profile', {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+      const res = await fetch(`${baseUrl}/user/profile`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
