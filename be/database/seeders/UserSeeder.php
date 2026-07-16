@@ -46,6 +46,18 @@ class UserSeeder extends Seeder
             ]
         );
 
+        User::firstOrCreate(
+            ['email' => 'audit@hse.com'],
+            [
+                'username' => 'audit',
+                'name' => 'Auditor HSE',
+                'password' => Hash::make('password'),
+                'role' => 'audit',
+                'no_hp' => '081234567893',
+                'departemen' => 'Audit',
+            ]
+        );
+
         User::factory(4)->admin()->create();
         User::factory(14)->user()->create();
     }

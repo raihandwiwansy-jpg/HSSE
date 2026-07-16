@@ -45,7 +45,7 @@ class UserManagementController extends Controller
             'name' => 'required|string|max:255',
             'tempat_lahir' => 'nullable|string|max:255',
             'tanggal_lahir' => 'nullable|date',
-            'role' => 'required|in:user,supervisor,admin',
+            'role' => 'required|in:user,supervisor,admin,audit,kasubag',
             'no_hp' => 'nullable|string|max:20',
             'departemen' => 'nullable|string|max:100',
         ]);
@@ -97,7 +97,7 @@ class UserManagementController extends Controller
             'name' => 'required|string|max:255',
             'tempat_lahir' => 'nullable|string|max:255',
             'tanggal_lahir' => 'nullable|date',
-            'role' => 'required|in:user,supervisor,admin',
+            'role' => 'required|in:user,supervisor,admin,audit,kasubag',
             'no_hp' => 'nullable|string|max:20',
             'departemen' => 'nullable|string|max:100',
         ]);
@@ -152,6 +152,8 @@ class UserManagementController extends Controller
                 ['value' => 'user', 'label' => 'User'],
                 ['value' => 'supervisor', 'label' => 'Supervisor'],
                 ['value' => 'admin', 'label' => 'Admin'],
+                ['value' => 'audit', 'label' => 'Audit'],
+                ['value' => 'kasubag', 'label' => 'Kasubag (Pak Oka)'],
             ],
         ]);
     }
@@ -217,7 +219,7 @@ class UserManagementController extends Controller
                 
                 // Format role
                 $role = strtolower(trim($role));
-                if (!in_array($role, ['user', 'supervisor', 'admin'])) {
+                if (!in_array($role, ['user', 'supervisor', 'admin', 'audit', 'kasubag'])) {
                     $role = 'user';
                 }
                 

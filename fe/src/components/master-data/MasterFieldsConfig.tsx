@@ -204,15 +204,14 @@ export default function MasterFieldsConfig() {
         </table>
       </div>
 
-      {/* Modal — rendered at root level to avoid background bleed */}
-      {showForm && (
+      {/* Modal — rendered via portal to escape parent transforms */}
+      {showForm && typeof window !== 'undefined' && require('react-dom').createPortal(
         <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-          style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
           onClick={() => { setShowForm(false); setEditItem(null); }}
         >
           <div
-            className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 w-full max-w-lg p-6"
+            className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 w-full max-w-lg p-6 animate-fade-in-up"
             style={{ maxHeight: '90vh', overflowY: 'auto' }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -283,7 +282,6 @@ export default function MasterFieldsConfig() {
                 >
                   <option value="">-- Tidak ada --</option>
                   <option value="departemen">Departemen</option>
-                  <option value="perusahaan">Perusahaan</option>
                   <option value="personil">Personil</option>
                   <option value="peralatan">Peralatan</option>
                   <option value="bahaya">Bahaya</option>
@@ -343,7 +341,8 @@ export default function MasterFieldsConfig() {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

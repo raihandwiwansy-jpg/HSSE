@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getHseKpiData, getHseKpiEntries, createHseKpi, updateHseKpi, deleteHseKpi } from '@/lib/api/hseKpi';
 import Button from '@/components/ui/Button';
+import Portal from '@/components/ui/Portal';
 import { toast } from 'react-toastify';
 import { Plus, Search, Edit, Trash2, BarChart3, ChevronLeft, ChevronRight, X, Calendar, FileText, Target, TrendingUp, Eye } from 'lucide-react';
 
@@ -342,6 +343,7 @@ export default function HseKpiPerformancePage() {
 
       {/* Input Form Modal */}
       {showForm && (
+        <Portal>
         <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 backdrop-blur-sm p-2 sm:p-4 overflow-y-auto animate-fade-in" onClick={(e) => e.target === e.currentTarget && setShowForm(false)}>
           <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-4xl my-4 border border-gray-200 dark:border-gray-700 animate-scale-in">
             <div className="sticky top-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-5 py-4 flex items-center justify-between z-10 rounded-t-2xl">
@@ -452,10 +454,12 @@ export default function HseKpiPerformancePage() {
             </div>
           </div>
         </div>
+        </Portal>
       )}
 
       {/* Detail Modal */}
       {showDetail && (
+        <Portal>
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in" onClick={(e) => e.target === e.currentTarget && setShowDetail(null)}>
           <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-lg border border-gray-200 dark:border-gray-700 animate-scale-in">
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700">
@@ -490,10 +494,12 @@ export default function HseKpiPerformancePage() {
             </div>
           </div>
         </div>
+        </Portal>
       )}
 
       {/* Delete Confirmation */}
       {deleteId && (
+        <Portal>
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in">
           <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-sm border border-gray-200 dark:border-gray-700 p-6 animate-scale-in">
             <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-4">
@@ -509,6 +515,7 @@ export default function HseKpiPerformancePage() {
             </div>
           </div>
         </div>
+        </Portal>
       )}
     </div>
   );

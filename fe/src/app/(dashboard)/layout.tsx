@@ -25,10 +25,10 @@ function SidebarContent({ children }: { children: ReactNode }) {
       <div className={`hidden lg:block shrink-0 transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`} />
 
       {/* Main content area */}
-      <div className="flex-1 flex flex-col min-h-screen bg-gray-50 dark:bg-[#0F0F1A]">
+      <div className="flex-1 flex flex-col min-h-screen bg-gray-50 dark:bg-[#0F0F1A] min-w-0 overflow-x-hidden">
         <Navbar />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6" key={pathname}>
-          <div className="max-w-7xl mx-auto animate-fade-in-up-fast">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6" key={pathname}>
+          <div className="max-w-7xl mx-auto w-full animate-fade-in-up-fast">
             {children}
           </div>
         </main>

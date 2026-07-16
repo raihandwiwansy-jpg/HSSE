@@ -222,17 +222,33 @@ class SafetyBehaviorController extends Controller
 
         $validated = $request->validate([
             'catatan' => 'nullable|string',
+            'action' => 'required|in:approve,reject',
         ]);
 
-        $behavior->update([
-            'status' => SafetyBehavior::STATUS_SELESAI,
-            'reviewed_at' => now(),
-            'catatan' => $validated['catatan'] ?? $behavior->catatan,
-        ]);
+        $statusToSet = $validated['action'] === 'approve' ? 'approved' : 'rejected';
+        
+        if ($request->user()->role === 'admin' || $request->user()->role === 'kasubag') {
+            $behavior->admin_status = $statusToSet;
+        } elseif ($request->user()->role === 'audit') {
+            $behavior->audit_status = $statusToSet;
+        }
+
+        if ($validated['catatan']) {
+            $behavior->catatan = $validated['catatan'];
+        }
+
+        if ($behavior->admin_status === 'approved' && $behavior->audit_status === 'approved') {
+            $behavior->status = SafetyBehavior::STATUS_SELESAI;
+            $behavior->reviewed_at = now();
+        } else {
+            $behavior->status = SafetyBehavior::STATUS_MENUNGGU; // Keep pending if rejected or incomplete
+        }
+
+        $behavior->save();
 
         return $this->success(
             $behavior->load('user'),
-            'Safety behavior berhasil dikonfirmasi'
+            'Safety behavior berhasil direview'
         );
     }
 

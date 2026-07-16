@@ -1,29 +1,29 @@
 import api from '../axios';
 
-export interface ManHoursParams {
-  search?: string;
-  date_from?: string;
-  date_to?: string;
-  status?: string;
-  page?: number;
-  per_page?: number;
+export interface MonthlyManHoursParams {
+  tahun?: string;
 }
 
-export interface ManHoursData {
-  user_id: number;
-  judul_pekerjaan: string;
-  lokasi: string;
-  tanggal: string;
-  durasi_jam: number;
-  deskripsi?: string;
-  status?: 'pending' | 'in_progress' | 'completed';
+export interface MonthlyManHoursData {
+  tahun: string;
+  bulan: string;
+  manpower_inl?: number;
+  manpower_kontraktor?: number;
+  manpower_outsourcing?: number;
+  normal_jam_inl?: number;
+  normal_jam_kontraktor?: number;
+  normal_jam_outsourcing?: number;
+  overtime_inl?: number;
+  overtime_kontraktor?: number;
+  overtime_outsourcing?: number;
+  cuti_sakit?: number;
 }
 
-export const getManHours = (params?: ManHoursParams) => {
+export const getManHours = (params?: MonthlyManHoursParams) => {
   return api.get('/man-hours', { params });
 };
 
-export const createManHours = (data: ManHoursData) => {
+export const createManHours = (data: MonthlyManHoursData) => {
   return api.post('/man-hours', data);
 };
 
@@ -31,12 +31,8 @@ export const getManHoursById = (id: number) => {
   return api.get(`/man-hours/${id}`);
 };
 
-export const updateManHours = (id: number, data: Partial<ManHoursData>) => {
+export const updateManHours = (id: number, data: Partial<MonthlyManHoursData>) => {
   return api.put(`/man-hours/${id}`, data);
-};
-
-export const updateManHoursStatus = (id: number, status: 'pending' | 'in_progress' | 'completed') => {
-  return api.patch(`/man-hours/${id}/status`, { status });
 };
 
 export const deleteManHours = (id: number) => {

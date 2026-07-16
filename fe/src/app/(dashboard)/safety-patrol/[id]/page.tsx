@@ -40,7 +40,7 @@ export default function SafetyPatrolDetailPage() {
   const p: SafetyPatrol | undefined = pData?.data?.data;
 
   const reviewMut = useMutation({
-    mutationFn: ({ id, c }: { id: number; c?: string }) => reviewSafetyPatrol(id, c),
+    mutationFn: ({ id, c, action }: { id: number; c?: string, action: 'approve' | 'reject' }) => reviewSafetyPatrol(id, c, action),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['safety-patrol', params.id] }); qc.invalidateQueries({ queryKey: ['safety-patrols'] }); qc.invalidateQueries({ queryKey: ['safety-patrol-status-counts'] }); toast.success('Safety patrol dikonfirmasi!'); setShowReview(false); setCatatanReview(''); },
     onError: (e: any) => toast.error(e?.response?.data?.message || 'Gagal'),
   });
@@ -67,7 +67,9 @@ export default function SafetyPatrolDetailPage() {
   );
 
   const od = p.observation_data || {} as any;
-  const canConfirm = p.status === 'menunggu' && user?.role === 'admin';
+  const canConfirmKasubag = (user?.role === 'kasubag' || user?.role === 'admin') && p.admin_status === 'pending';
+  const canConfirmAudit = user?.role === 'audit' && p.audit_status === 'pending';
+  const canConfirm = p.status === 'menunggu' && (canConfirmKasubag || canConfirmAudit);
   const canDelete = (user?.role === 'admin') || (user?.role === 'user' && p.status === 'menunggu');
 
   return (
@@ -91,7 +93,7 @@ export default function SafetyPatrolDetailPage() {
         <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
           {canConfirm && !showReview && (
             <Button variant="success" size="sm" onClick={() => setShowReview(true)}>
-              <CheckCircle size={14} /> Konfirmasi Selesai
+              <CheckCircle size={14} /> Review Laporan
             </Button>
           )}
           <Button variant="outline" size="sm" onClick={() => setShowPrintView(true)}>
@@ -114,8 +116,11 @@ export default function SafetyPatrolDetailPage() {
           </div>
           <textarea className="hse-input min-h-[80px] text-sm" value={catatanReview} onChange={e => setCatatanReview(e.target.value)} placeholder="Tambahkan catatan (opsional)..." />
           <div className="flex items-center gap-2">
-            <Button size="sm" onClick={() => reviewMut.mutate({ id: p.id, c: catatanReview })} isLoading={reviewMut.isPending}>
-              <CheckCircle size={14} /> Ya, Konfirmasi
+            <Button size="sm" onClick={() => reviewMut.mutate({ id: p.id, c: catatanReview, action: 'approve' })} isLoading={reviewMut.isPending}>
+              <CheckCircle size={14} /> Setujui
+            </Button>
+            <Button variant="danger" size="sm" onClick={() => reviewMut.mutate({ id: p.id, c: catatanReview, action: 'reject' })} isLoading={reviewMut.isPending}>
+              Tolak
             </Button>
             <Button variant="outline" size="sm" onClick={() => { setShowReview(false); setCatatanReview(''); }}>Batal</Button>
           </div>
@@ -216,8 +221,18 @@ export default function SafetyPatrolDetailPage() {
         </DetailCard>
       )}
 
-      {/* Timestamps */}
-      <DetailCard title="Riwayat Waktu" icon={<Clock size={14} className="text-blue-500" />}>
+      {/* Timestamps & Status Details */}
+      <DetailCard title="Status & Riwayat Waktu" icon={<Clock size={14} className="text-blue-500" />}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+            <p className="text-xs font-bold text-gray-500 uppercase mb-1">Status Kasubag (Pak Oka)</p>
+            <StatusBadge status={p.admin_status || 'pending'} />
+          </div>
+          <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+            <p className="text-xs font-bold text-gray-500 uppercase mb-1">Status Audit</p>
+            <StatusBadge status={p.audit_status || 'pending'} />
+          </div>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {p.submitted_at && <TimestampItem label="Dibuat" value={p.submitted_at} />}
           {p.reviewed_at && <TimestampItem label="Dikonfirmasi" value={p.reviewed_at} />}

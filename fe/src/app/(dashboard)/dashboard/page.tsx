@@ -91,10 +91,10 @@ export default function DashboardPage() {
     <div className="space-y-6 sm:space-y-8 animate-fade-in-up pb-10">
       
       {/* ==================== 1. BRANDING HEADER BANNER WITH ROTATING BACKGROUND ==================== */}
-      <div className="relative overflow-hidden rounded-3xl border border-blue-900/30 p-6 sm:p-8 text-white shadow-2xl min-h-[300px] sm:min-h-[350px] flex flex-col justify-between transition-all duration-500">
+      <div className="relative overflow-hidden rounded-3xl border border-blue-900/30 text-white shadow-2xl min-h-[340px] sm:min-h-[380px] flex flex-col justify-between transition-all duration-500 group">
         
         {/* Slideshow background layer */}
-        <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0 overflow-hidden">
           {photos.map((src, idx) => (
             <div
               key={idx}
@@ -105,30 +105,27 @@ export default function DashboardPage() {
               <img
                 src={src}
                 alt={`Dokumentasi HSSE ${idx + 1}`}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover transition-transform duration-[4500ms] ease-out group-hover:scale-110"
               />
             </div>
           ))}
           {/* Multi-layered dark gradients for perfect text readability */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/30 to-black/50 dark:from-black/85 dark:via-black/60 dark:to-black/85 z-20 pointer-events-none transition-colors duration-500" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 dark:from-black/85 dark:via-transparent dark:to-black/30 z-20 pointer-events-none transition-colors duration-500" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-500/10 via-transparent to-transparent z-20 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-black/60 dark:from-black/90 dark:via-black/75 dark:to-black/90 z-20 pointer-events-none transition-colors duration-500" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 dark:from-black/95 dark:via-transparent dark:to-black/40 z-20 pointer-events-none transition-colors duration-500" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-500/20 via-transparent to-transparent z-20 pointer-events-none" />
         </div>
 
         {/* Content Wrapper */}
-        <div className="relative z-30 flex flex-col justify-between h-full w-full gap-8">
+        <div className="relative z-30 flex flex-col justify-between h-full w-full gap-8 p-6 sm:p-8 flex-1">
           
           {/* Header Badges */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-white/10">
-            <div className="flex items-center gap-3">
-              <div className="w-14 h-14 flex items-center justify-center p-0.5 shrink-0 overflow-hidden">
-                <img src="/Picture1.png" alt="Logo INL" className="w-full h-full object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]" />
-              </div>
-              <div>
-                <h2 className="text-lg sm:text-xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-cyan-200">
-                  PT INDUSTRI NABATI LESTARI
-                </h2>
-                <p className="text-[10px] sm:text-xs text-gray-300 font-semibold tracking-wider">SMART SOLUTION FOR HSSE</p>
+            <div className="flex flex-col items-start gap-2.5 shrink-0">
+              <span className={`px-3 py-1.5 rounded-xl text-xs font-black tracking-wider ${ROLE_COLOR[role]} border border-current/10 shadow-lg backdrop-blur-md`}>
+                ROLE: {ROLE_LABEL[role]}
+              </span>
+              <div className="backdrop-blur-md bg-black/35 border border-white/10 rounded-xl px-3.5 py-2 text-xs text-gray-300 shadow-md">
+                Karyawan: <span className="font-extrabold text-white dark:text-blue-100">{user?.name || 'Administrator'}</span>
               </div>
             </div>
             
@@ -136,42 +133,35 @@ export default function DashboardPage() {
               <button
                 onClick={handleRefresh}
                 disabled={isFetching}
-                className="flex items-center gap-2 bg-white/15 hover:bg-white/25 active:scale-95 transition-all border border-white/20 rounded-xl px-3 py-1.5 text-xs text-white shadow-lg backdrop-blur-sm"
+                className="flex items-center gap-2 bg-white/10 hover:bg-white/20 active:scale-95 transition-all border border-white/15 rounded-xl px-3 py-1.5 text-xs text-white dark:text-blue-50 shadow-lg backdrop-blur-md"
               >
                 <RefreshCw size={14} className={`${isFetching ? 'animate-spin' : ''}`} />
                 <span>{isFetching ? 'Refreshing...' : 'Refresh'}</span>
               </button>
               
-              <div className="flex items-center gap-2 bg-black/45 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-blue-200 backdrop-blur-sm">
+              <div className="flex items-center gap-2 bg-black/40 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-blue-200 backdrop-blur-md hover:border-blue-500/30 transition-all">
                 <Award size={14} className="text-yellow-400" />
-                <span>OPENSIGNAL AWARD</span>
+                <span className="font-semibold">OPENSIGNAL AWARD</span>
               </div>
-              <div className="flex items-center gap-2 bg-black/45 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-cyan-200 backdrop-blur-sm">
+              <div className="flex items-center gap-2 bg-black/40 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-cyan-200 backdrop-blur-md hover:border-cyan-500/30 transition-all">
                 <Trophy size={14} className="text-yellow-400" />
-                <span>The Most Reliable for HSSE</span>
+                <span className="font-semibold">The Most Reliable for HSSE</span>
               </div>
             </div>
           </div>
 
-          {/* Dashboard Title & Description */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-            <div>
-              <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-none text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]">
+          {/* Dashboard Title & Description with modern layout */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pt-4">
+            <div className="backdrop-blur-md bg-black/30 dark:bg-black/50 border border-white/10 rounded-2xl p-4 sm:p-5 max-w-2xl shadow-xl">
+              <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-none text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-50 to-blue-200 dark:from-blue-100 dark:via-indigo-100 dark:to-cyan-200 drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]">
                 HSSE DASHBOARD
               </h1>
-              <p className="text-sm sm:text-base text-gray-200 mt-2 font-medium tracking-wide drop-shadow-[0_1px_4px_rgba(0,0,0,0.5)]">
-                Real-Time Monitoring Keamanan & Jam Kerja Selamat (Safe Man Hours)
+              <p className="text-xs sm:text-sm text-gray-200 dark:text-gray-300 mt-3 font-semibold tracking-wide leading-relaxed drop-shadow-[0_1px_4px_rgba(0,0,0,0.5)]">
+                Sistem monitoring terpusat untuk kesehatan, keselamatan, keamanan kerja, serta pencatatan Jam Kerja Selamat (Safe Man Hours) secara real-time.
               </p>
             </div>
             
-            <div className="flex flex-col items-start md:items-end gap-1.5">
-              <span className={`px-3 py-1.5 rounded-xl text-xs font-bold ${ROLE_COLOR[role]} border border-current/10 shadow-sm`}>
-                Role: {ROLE_LABEL[role]}
-              </span>
-              <p className="text-xs text-gray-300 drop-shadow-[0_1px_4px_rgba(0,0,0,0.5)]">
-                Logged in: <span className="font-semibold text-white">{user?.name || 'Administrator'}</span>
-              </p>
-            </div>
+            <div className="hidden"></div>
           </div>
 
         </div>
@@ -211,7 +201,7 @@ export default function DashboardPage() {
                 <Users size={16} className="text-blue-500" />
               </div>
               <div className="text-xl sm:text-2xl font-black text-gray-800 dark:text-white">
-                {role === 'admin' ? (rd?.stats?.total_manpower ?? 0) : '-'}
+                {rd?.stats?.total_manpower ?? '-'}
               </div>
               <p className="text-[10px] text-gray-400 mt-1">Karyawan Terdaftar</p>
             </div>
@@ -222,7 +212,7 @@ export default function DashboardPage() {
                 <Clock size={16} className="text-emerald-500" />
               </div>
               <div className="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400">
-                {(role === 'admin' || role === 'user') ? (rd?.stats?.safe_man_hours ?? 0).toLocaleString() : '-'}
+                {(rd?.stats?.safe_man_hours ?? 0).toLocaleString()}
               </div>
               <p className="text-[10px] text-gray-400 mt-1">Jam Kerja Selamat</p>
             </div>
@@ -233,7 +223,7 @@ export default function DashboardPage() {
                 <AlertTriangle size={16} className="text-red-500" />
               </div>
               <div className="text-xl sm:text-2xl font-black text-red-650 dark:text-red-400">
-                {(role === 'admin' || role === 'user') ? (rd?.stats?.total_incident ?? 0) : '-'}
+                {rd?.stats?.total_incident ?? '-'}
               </div>
               <p className="text-[10px] text-gray-400 mt-1">Laporan Masuk</p>
             </div>
@@ -244,7 +234,7 @@ export default function DashboardPage() {
                 <ShieldAlert size={16} className="text-amber-500" />
               </div>
               <div className="text-xl sm:text-2xl font-black text-amber-600 dark:text-amber-400">
-                {(role === 'admin' || role === 'user') ? (rd?.stats?.near_miss ?? 0) : '-'}
+                {rd?.stats?.near_miss ?? '-'}
               </div>
               <p className="text-[10px] text-gray-400 mt-1">Kejadian Hampir Celaka</p>
             </div>

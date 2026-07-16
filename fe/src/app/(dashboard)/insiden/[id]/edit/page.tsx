@@ -5,14 +5,33 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getInsidenById, updateInsiden } from '@/lib/api/insiden';
 import Button from '@/components/ui/Button';
 import { toast } from 'react-toastify';
-import { ChevronLeft, Save, Upload, X } from 'lucide-react';
+import { ChevronLeft, Save, Upload, X, ShieldAlert } from 'lucide-react';
 import WifiLoader from '@/components/ui/WifiLoader';
 import Image from 'next/image';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function EditInsidenPage() {
   const router = useRouter();
   const { id } = useParams();
   const qc = useQueryClient();
+  const { user } = useAuth();
+
+  if (user && user.role !== 'admin' && user.role !== 'kasubag') {
+    return (
+      <div className="p-6 bg-white dark:bg-gray-900 rounded-2xl border border-red-200 dark:border-red-900/30 text-center max-w-md mx-auto my-12 shadow-sm animate-fade-in-up">
+        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-red-50 dark:bg-red-950/20 flex items-center justify-center text-red-600 dark:text-red-400">
+          <ShieldAlert size={32} />
+        </div>
+        <h2 className="text-lg font-bold text-gray-850 dark:text-white">Akses Ditolak</h2>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+          Anda tidak memiliki akses ke modul Laporan Insiden. Silakan kembali ke Dashboard.
+        </p>
+        <Button onClick={() => router.push('/dashboard')} size="sm" className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold">
+          Kembali ke Dashboard
+        </Button>
+      </div>
+    );
+  }
 
   const [judul, setJudul] = useState('');
   const [jenis, setJenis] = useState('');

@@ -223,17 +223,33 @@ class SafetyPatrolController extends Controller
 
         $validated = $request->validate([
             'catatan' => 'nullable|string',
+            'action' => 'required|in:approve,reject',
         ]);
 
-        $patrol->update([
-            'status' => SafetyPatrol::STATUS_SELESAI,
-            'reviewed_at' => now(),
-            'catatan' => $validated['catatan'] ?? $patrol->catatan,
-        ]);
+        $statusToSet = $validated['action'] === 'approve' ? 'approved' : 'rejected';
+        
+        if ($request->user()->role === 'admin' || $request->user()->role === 'kasubag') {
+            $patrol->admin_status = $statusToSet;
+        } elseif ($request->user()->role === 'audit') {
+            $patrol->audit_status = $statusToSet;
+        }
+
+        if ($validated['catatan']) {
+            $patrol->catatan = $validated['catatan'];
+        }
+
+        if ($patrol->admin_status === 'approved' && $patrol->audit_status === 'approved') {
+            $patrol->status = SafetyPatrol::STATUS_SELESAI;
+            $patrol->reviewed_at = now();
+        } else {
+            $patrol->status = SafetyPatrol::STATUS_MENUNGGU; // Keep pending if rejected or incomplete
+        }
+
+        $patrol->save();
 
         return $this->success(
             $patrol->load('user'),
-            'Safety patrol berhasil dikonfirmasi'
+            'Safety patrol berhasil direview'
         );
     }
 

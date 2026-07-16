@@ -7,7 +7,7 @@ import Button from '@/components/ui/Button';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { toast } from 'react-toastify';
 import { Plus, Search, Eye, Edit, Trash2, FileText, ChevronLeft, ChevronRight, CheckCircle, Clock } from 'lucide-react';
-import ExportButtons from '@/components/ui/ExportButtons';
+
 import { useAuth } from '@/hooks/useAuth';
 import Modal from '@/components/ui/Modal';
 import WifiLoader from '@/components/ui/WifiLoader';
@@ -56,7 +56,7 @@ export default function SafetyBehaviorListPage() {
           <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1 ml-11">Observasi perilaku keselamatan kerja</p>
         </div>
         <div className="flex items-center gap-2">
-          {user?.role === 'admin' && <ExportButtons module="safety-behavior" hideExcel />}
+
           {user?.role === 'user' && (
             <Button onClick={() => router.push('/safety-behavior/create')} size="sm" className="shadow-lg shadow-blue-500/20">
               <Plus size={16} /> Buat Laporan Baru

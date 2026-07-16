@@ -10,7 +10,6 @@ import MasterFieldsConfig from '@/components/master-data/MasterFieldsConfig';
 
 const referensiTypes = [
   { key: 'departemen', label: 'Departemen', icon: Building2, desc: 'Data departemen / bagian' },
-  { key: 'perusahaan', label: 'Perusahaan', icon: Building, desc: 'Data perusahaan / kontraktor' },
   { key: 'personil', label: 'Personil', icon: Users, desc: 'Data personil / petugas' },
   { key: 'peralatan', label: 'Peralatan', icon: Wrench, desc: 'Data peralatan / alat kerja' },
   { key: 'bahaya', label: 'Bahaya', icon: AlertTriangle, desc: 'Identifikasi bahaya' },

@@ -37,8 +37,8 @@ export const submitSafetyPatrol = (id: number) => {
   return api.post(`/safety-patrol/${id}/submit`);
 };
 
-export const reviewSafetyPatrol = (id: number, catatan?: string) => {
-  return api.post(`/safety-patrol/${id}/review`, { catatan });
+export const reviewSafetyPatrol = (id: number, catatan?: string, action?: string) => {
+  return api.post(`/safety-patrol/${id}/review`, { catatan, action });
 };
 
 export const getSafetyPatrolStatusCounts = () => {

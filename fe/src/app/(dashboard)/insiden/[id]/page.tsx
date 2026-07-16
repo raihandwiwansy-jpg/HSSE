@@ -5,16 +5,34 @@ import { getInsidenById, updateStatusInsiden } from '@/lib/api/insiden';
 import Button from '@/components/ui/Button';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { toast } from 'react-toastify';
-import { ChevronLeft, Calendar, MapPin, Tag, User, Clock, FileText, CheckCircle } from 'lucide-react';
+import { ChevronLeft, Calendar, MapPin, Tag, User, Clock, FileText, CheckCircle, ShieldAlert } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import WifiLoader from '@/components/ui/WifiLoader';
 import Image from 'next/image';
+import ExportButtons from '@/components/ui/ExportButtons';
 
 export default function InsidenDetailPage() {
   const router = useRouter();
   const { id } = useParams();
   const qc = useQueryClient();
   const { user } = useAuth();
+
+  if (user && user.role !== 'admin' && user.role !== 'kasubag') {
+    return (
+      <div className="p-6 bg-white dark:bg-gray-900 rounded-2xl border border-red-200 dark:border-red-900/30 text-center max-w-md mx-auto my-12 shadow-sm animate-fade-in-up">
+        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-red-50 dark:bg-red-950/20 flex items-center justify-center text-red-600 dark:text-red-400">
+          <ShieldAlert size={32} />
+        </div>
+        <h2 className="text-lg font-bold text-gray-850 dark:text-white">Akses Ditolak</h2>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+          Anda tidak memiliki akses ke modul Laporan Insiden. Silakan kembali ke Dashboard.
+        </p>
+        <Button onClick={() => router.push('/dashboard')} size="sm" className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold">
+          Kembali ke Dashboard
+        </Button>
+      </div>
+    );
+  }
 
   const { data, isLoading } = useQuery({
     queryKey: ['insiden', id],
@@ -76,20 +94,27 @@ export default function InsidenDetailPage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 animate-fade-in-up">
-      <div className="flex items-center gap-3">
-        <button
-          onClick={() => router.push('/insiden')}
-          className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-          title="Kembali"
-        >
-          <ChevronLeft size={20} />
-        </button>
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-850 dark:text-white">Detail Laporan Insiden</h1>
-          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-            Detail laporan, kronologi, bukti foto, serta penanganan status insiden.
-          </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => router.push('/insiden')}
+            className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+            title="Kembali"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-850 dark:text-white">Detail Laporan Insiden</h1>
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+              Detail laporan, kronologi, bukti foto, serta penanganan status insiden.
+            </p>
+          </div>
         </div>
+        {(user?.role === 'admin' || user?.role === 'kasubag') && (
+          <div className="shrink-0">
+            <ExportButtons isSingle module="insiden" id={Number(id)} />
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">

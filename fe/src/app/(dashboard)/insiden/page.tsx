@@ -10,7 +10,7 @@ import { Plus, Search, Eye, Edit, Trash2, ShieldAlert, ChevronLeft, ChevronRight
 import { useAuth } from '@/hooks/useAuth';
 import Modal from '@/components/ui/Modal';
 import WifiLoader from '@/components/ui/WifiLoader';
-import ExportButtons from '@/components/ui/ExportButtons';
+
 
 export default function InsidenListPage() {
   const router = useRouter();
@@ -22,15 +22,15 @@ export default function InsidenListPage() {
   const [page, setPage] = useState(1);
   const [deleteId, setDeleteId] = useState<number | null>(null);
 
-  if (user?.role === 'supervisor') {
+  if (user && user.role !== 'admin' && user.role !== 'kasubag') {
     return (
       <div className="p-6 bg-white dark:bg-gray-900 rounded-2xl border border-red-200 dark:border-red-900/30 text-center max-w-md mx-auto my-12 shadow-sm animate-fade-in-up">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-red-55 dark:bg-red-950/20 flex items-center justify-center text-red-600 dark:text-red-400">
+        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-red-50 dark:bg-red-950/20 flex items-center justify-center text-red-600 dark:text-red-400">
           <ShieldAlert size={32} />
         </div>
         <h2 className="text-lg font-bold text-gray-850 dark:text-white">Akses Ditolak</h2>
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-          Supervisor tidak memiliki akses ke modul Laporan Insiden. Silakan kembali ke Dashboard.
+          Anda tidak memiliki akses ke modul Laporan Insiden. Silakan kembali ke Dashboard.
         </p>
         <Button onClick={() => router.push('/dashboard')} size="sm" className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold">
           Kembali ke Dashboard
@@ -89,8 +89,8 @@ export default function InsidenListPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {user?.role === 'admin' && <ExportButtons module="insiden" hideExcel />}
-          {user?.role === 'user' && (
+
+          {(user?.role === 'admin' || user?.role === 'kasubag') && (
             <Button onClick={() => router.push('/insiden/create')} size="sm" className="shadow-lg shadow-red-500/20 bg-red-600 hover:bg-red-700 text-white">
               <Plus size={16} /> Laporkan Insiden
             </Button>
@@ -210,7 +210,7 @@ export default function InsidenListPage() {
                             <Edit size={14} />
                           </button>
                         )}
-                        {(user?.role === 'admin' || (user?.role === 'user' && insiden.status === 'pending')) && (
+                        {(user?.role === 'admin' || user?.role === 'user') && (
                           <button
                             onClick={() => setDeleteId(insiden.id)}
                             className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"

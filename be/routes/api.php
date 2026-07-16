@@ -24,7 +24,11 @@ use App\Http\Controllers\LocationController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\MasterDataController;
 use App\Http\Controllers\ManHoursController;
+use App\Http\Controllers\Api\LandingPageController;
 use Illuminate\Support\Facades\Route;
+
+// Public Routes
+Route::get('/landing-stats', [LandingPageController::class, 'getStats']);
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -184,7 +188,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('safety-patrol/status-counts', [SafetyPatrolController::class, 'statusCounts']);
     Route::apiResource('safety-patrol', SafetyPatrolController::class);
     Route::post('safety-patrol/{id}/submit', [SafetyPatrolController::class, 'submit']);
-    Route::middleware('role:admin')->group(function () {
+    Route::middleware('role:admin,audit')->group(function () {
         Route::post('safety-patrol/{id}/review', [SafetyPatrolController::class, 'review']);
     });
 
@@ -194,22 +198,22 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('safety-behavior/status-counts', [SafetyBehaviorController::class, 'statusCounts']);
     Route::apiResource('safety-behavior', SafetyBehaviorController::class);
     Route::post('safety-behavior/{id}/submit', [SafetyBehaviorController::class, 'submit']);
-    Route::middleware('role:admin')->group(function () {
+    Route::middleware('role:admin,audit')->group(function () {
         Route::post('safety-behavior/{id}/review', [SafetyBehaviorController::class, 'review']);
     });
 
     // ========================================
-    // SAFETY PATROL & BEHAVIOR EXPORTS (admin only)
+    // SAFETY PATROL & BEHAVIOR EXPORTS (admin & kasubag)
     // ========================================
-    Route::middleware('role:admin')->group(function () {
+    Route::middleware('role:admin,kasubag')->group(function () {
         Route::get('export/safety-patrol-pdf', [ExportController::class, 'safetyPatrolPdf']);
         Route::get('export/safety-patrol-single/{id}', [ExportController::class, 'safetyPatrolSinglePdf']);
         Route::get('export/safety-behavior-pdf', [ExportController::class, 'safetyBehaviorPdf']);
         Route::get('export/safety-behavior-single/{id}', [ExportController::class, 'safetyBehaviorSinglePdf']);
     });
 
-    // Export (hanya admin)
-    Route::middleware('role:admin')->group(function () {
+    // Export (hanya admin & kasubag)
+    Route::middleware('role:admin,kasubag')->group(function () {
         Route::get('export/insiden-pdf', [ExportController::class, 'exportInsidenPDF']);
         Route::get('export/insiden-excel', [ExportController::class, 'exportInsidenExcel']);
         Route::get('export/insiden-single/{id}', [ExportController::class, 'insidenSinglePdf']);
@@ -245,4 +249,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // User export - permit yang sudah selesai milik sendiri
     Route::get('export/permit-single/{id}', [ExportController::class, 'permitSinglePdf']);
+
+    // Man Hours Export
+    Route::get('export/man-hours-excel', [ExportController::class, 'exportManHoursExcel']);
 });

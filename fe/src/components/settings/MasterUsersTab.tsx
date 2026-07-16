@@ -12,12 +12,16 @@ const roleLabels: Record<string, string> = {
   user: 'User',
   supervisor: 'Supervisor',
   admin: 'Admin',
+  audit: 'Audit',
+  kasubag: 'Kasubag',
 };
 
 const roleColors: Record<string, string> = {
   user: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
   supervisor: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
   admin: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+  audit: 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400',
+  kasubag: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
 };
 
 interface FormData {

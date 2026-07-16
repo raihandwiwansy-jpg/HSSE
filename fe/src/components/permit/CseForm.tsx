@@ -76,10 +76,7 @@ export default function CseForm({ data, onChange }: CseFormProps) {
               <Input label="Pemohon Izin (Foreman/Supervisor) *" name="pemohon_izin" value={(data.pemohon_izin as string)||''} onChange={e=>u('pemohon_izin',e.target.value)} register={()=>({})} />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300">Perusahaan</label>
-                <MasterSelect masterType="perusahaan" value={(data.perusahaan as string)||''} onChange={(v) => u('perusahaan', v)} placeholder="Pilih perusahaan..." />
-              </div>
+              <Input label="Perusahaan" name="perusahaan" value={(data.perusahaan as string)||''} onChange={e=>u('perusahaan',e.target.value)} register={()=>({})} placeholder="Nama Perusahaan" />
               <Input label="Fasilitas" name="fasilitas" value={(data.fasilitas as string)||''} onChange={e=>u('fasilitas',e.target.value)} register={()=>({})} />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

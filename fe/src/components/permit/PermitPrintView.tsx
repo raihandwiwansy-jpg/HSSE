@@ -1319,12 +1319,25 @@ export default function PermitPrintView({ permit }: PermitPrintViewProps) {
       {permit.jenis === 'rwp' && <RwpPrint det={det} permit={permit} />}
       {permit.jenis === 'whp' && <WhpPrint det={det} permit={permit} />}
 
-      <CompletionSection permit={permit} />
-
-      {/* Footer */}
-      <div style={{ fontSize: '5.5px', color: '#888', borderTop: '0.5px solid #ccc', paddingTop: '2px', marginTop: '4px', textAlign: 'center' }}>
-        Note : - Putih: HSE, - Merah Muda: Pemohon Izin, - Hijau Muda: Dept lain (Mech/Sipil/Elektrik)
-      </div>
-    </div>
-  );
-}
+       <CompletionSection permit={permit} />
+ 
+       {permit.jenis === 'ewp' && det.gambar_fasilitas && (
+         <div style={{ marginTop: '10px', textAlign: 'center', border: '1px dashed #ccc', padding: '6px', pageBreakInside: 'avoid' }}>
+           <div style={{ fontSize: '9px', fontWeight: 'bold', marginBottom: '6px', textAlign: 'left', textTransform: 'uppercase', color: '#000' }}>
+             Lampiran: Gambar / Sketsa Fasilitas Bawah Tanah
+           </div>
+           <img 
+             src={det.gambar_fasilitas as string} 
+             style={{ maxHeight: '500px', maxWidth: '100%', objectFit: 'contain', display: 'block', margin: '0 auto' }} 
+             alt="Sketsa Fasilitas Bawah Tanah" 
+           />
+         </div>
+       )}
+ 
+       {/* Footer */}
+       <div style={{ fontSize: '5.5px', color: '#888', borderTop: '0.5px solid #ccc', paddingTop: '2px', marginTop: '4px', textAlign: 'center' }}>
+         Note : - Putih: HSE, - Merah Muda: Pemohon Izin, - Hijau Muda: Dept lain (Mech/Sipil/Elektrik)
+       </div>
+     </div>
+   );
+ }

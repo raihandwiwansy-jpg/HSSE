@@ -6,13 +6,10 @@ export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   if (pathname === '/') {
-    if (token) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
-    }
-    return NextResponse.redirect(new URL('/login', request.url));
+    return NextResponse.next();
   }
 
-  const isPublic = pathname === '/login';
+  const isPublic = pathname === '/login' || pathname === '/' || pathname === '/forgot-password';
 
   if (!isPublic && !token) {
     return NextResponse.redirect(new URL('/login', request.url));

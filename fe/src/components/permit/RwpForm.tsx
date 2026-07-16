@@ -95,10 +95,7 @@ export default function RwpForm({ data, onChange }: RwpFormProps) {
           <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Pemohon Izin</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <Input label="Nama" name="pemohon_nama" value={(data.pemohon_nama as string)||''} onChange={e=>u('pemohon_nama',e.target.value)} register={()=>({})} />
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300">Perusahaan</label>
-              <MasterSelect masterType="perusahaan" value={(data.pemohon_perusahaan as string)||''} onChange={(v) => u('pemohon_perusahaan', v)} placeholder="Pilih perusahaan..." />
-            </div>
+            <Input label="Perusahaan" name="pemohon_perusahaan" value={(data.pemohon_perusahaan as string)||''} onChange={e=>u('pemohon_perusahaan',e.target.value)} register={()=>({})} placeholder="Nama Perusahaan" />
             <Input label="Jabatan" name="pemohon_jabatan" value={(data.pemohon_jabatan as string)||''} onChange={e=>u('pemohon_jabatan',e.target.value)} register={()=>({})} />
             <Input label="No. Badge" name="pemohon_no_badge" value={(data.pemohon_no_badge as string)||''} onChange={e=>u('pemohon_no_badge',e.target.value)} register={()=>({})} />
             <Input label="Tanda Tangan" name="pemohon_tanda_tangan" value={(data.pemohon_tanda_tangan as string)||''} onChange={()=>{}} register={()=>({})} disabled className="opacity-60" />

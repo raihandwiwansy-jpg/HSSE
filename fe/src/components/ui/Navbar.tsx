@@ -3,15 +3,19 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { User, LogOut, ChevronDown, Shield, Settings, UserCircle, Clock } from 'lucide-react';
+import { User, LogOut, ChevronDown, Shield, Settings, UserCircle, Clock, BookOpen, Menu } from 'lucide-react';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { useAuth } from '@/hooks/useAuth';
+import GuideBook from '@/components/ui/GuideBook';
+import { useSidebar } from '@/components/ui/Sidebar';
 
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const { user, logout: authLogout } = useAuth();
+  const { isMobileOpen, setIsMobileOpen } = useSidebar();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [guideOpen, setGuideOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -61,6 +65,15 @@ export default function Navbar() {
     <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/60 dark:border-gray-700/60 h-14 flex items-center justify-between px-3 sm:px-6 gap-2 transition-colors duration-300 sticky top-0 z-30">
       {/* Left */}
       <div className="flex items-center gap-2 min-w-0">
+        {/* Hamburger mobile menu button */}
+        <button
+          onClick={() => setIsMobileOpen(!isMobileOpen)}
+          className="lg:hidden p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg text-gray-600 dark:text-gray-300 transition-colors shrink-0"
+          aria-label="Toggle Menu"
+        >
+          <Menu size={20} />
+        </button>
+
         <div className="flex items-center gap-1.5">
           <Shield size={16} className="text-blue-500 shrink-0" />
           <h1 className="text-sm sm:text-base font-bold text-gray-800 dark:text-white leading-none truncate">
@@ -91,6 +104,16 @@ export default function Navbar() {
 
       {/* Right */}
       <div className="flex items-center gap-2 shrink-0">
+        {!pathname.startsWith('/dashboard') && !pathname.startsWith('/settings') && !pathname.startsWith('/profil') && (
+          <button
+            onClick={() => setGuideOpen(true)}
+            title="Buku Panduan"
+            className="relative p-2 text-amber-600 dark:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-xl transition-all hover:scale-105 active:scale-95 group overflow-hidden"
+          >
+            <span className="absolute inset-0 bg-amber-400/20 scale-0 rounded-xl group-active:scale-100 transition-transform duration-300 ease-out" />
+            <BookOpen size={20} className="relative z-10 group-hover:rotate-[-5deg] transition-transform duration-300" />
+          </button>
+        )}
         <ThemeToggle />
 
         {/* Profile Dropdown */}
@@ -175,6 +198,8 @@ export default function Navbar() {
           )}
         </div>
       </div>
+
+      <GuideBook isOpen={guideOpen} onClose={() => setGuideOpen(false)} />
     </header>
   );
 }

@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'react-toastify';
 import { login, isAuthenticated } from '@/lib/api/auth';
-import { ArrowRight, Eye, EyeOff, Lock, Mail, Sparkles, Shield } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Eye, EyeOff, Lock, Mail, Sparkles, Shield } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useTheme } from '@/context/ThemeContext';
@@ -65,7 +65,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className={`min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8 theme-transition ${isDark
+    <div className={`min-h-screen lg:h-screen lg:overflow-hidden flex items-center justify-center p-4 sm:p-6 lg:p-8 theme-transition ${isDark
       ? 'bg-[#0B0F19]'
       : 'bg-[#F8F9FA]'
       }`}>
@@ -94,7 +94,7 @@ export default function LoginPage() {
               />
             </div>
             <h2 className={`text-lg sm:text-xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-slate-800'}`}>
-              PT. Industri Nabati Lestari HSSE
+              PT. Industri Nabati Lestari
             </h2>
             <p className={`text-xs sm:text-sm mt-1.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
               Masuk ke dashboard manajemen HSSE
@@ -217,12 +217,13 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Back link */}
-          <div className="text-center mt-6">
-            <Link href="/" className={`text-xs font-medium transition-colors ${isDark ? 'text-slate-400 hover:text-slate-200' : 'text-slate-400 hover:text-slate-650'}`}>
-              Kembali ke Beranda
+          <div className="mt-6 text-center">
+            <Link href="/" className={`text-xs font-medium transition-colors flex items-center justify-center gap-1 ${isDark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-800'}`}>
+              <ArrowLeft size={14} /> Kembali ke halaman utama
             </Link>
           </div>
+
+
 
         </div>
       </div>

@@ -13,13 +13,14 @@ import { useState, useEffect } from 'react';
 import PermitCompletionForm from '@/components/permit/PermitCompletionForm';
 import JsaForm from '@/components/permit/JsaForm';
 import WifiLoader from '@/components/ui/WifiLoader';
+import Portal from '@/components/ui/Portal';
 
 const PermitPrintView = dynamic(() => import('@/components/permit/PermitPrintView'), { ssr: false });
 const JsaPrintView = dynamic(() => import('@/components/permit/JsaPrintView'), { ssr: false });
 import {
   ArrowLeft, Edit, Send, CheckCircle, XCircle, Clock, FileText, MapPin, Calendar,
   User, ClipboardList, Shield, AlertTriangle, PenTool, Stamp, CircleCheck,
-  ClipboardCheck, Printer, X, Trash2
+  ClipboardCheck, Printer, X, Trash2, Activity
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
@@ -310,15 +311,18 @@ export default function PermitDetailPage() {
       </div>
 
       {/* Workflow Timeline (Responsive) */}
-      <div className="bg-white dark:bg-gray-900 rounded-2xl p-4 sm:p-6 border border-gray-200 dark:border-gray-700 shadow-sm">
-        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Alur Persetujuan</h3>
+      <div className="bg-white dark:bg-gray-900/50 backdrop-blur-md rounded-3xl p-6 border border-gray-200/80 dark:border-gray-800 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)]">
+        <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-6 flex items-center gap-2">
+          <Activity size={14} className="text-blue-500" />
+          Alur Persetujuan
+        </h3>
         <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0 pb-2">
-          <div className="flex items-center justify-between gap-1 relative min-w-[600px] sm:min-w-0">
-            <div className="absolute top-5 left-0 right-0 h-0.5 bg-gray-200 dark:bg-gray-700 mx-10"/>
-            <div className="absolute top-5 left-0 h-0.5 mx-10 transition-all duration-500"
+          <div className="flex items-center justify-between gap-1 relative min-w-[700px] sm:min-w-0">
+            <div className="absolute top-5 left-0 right-0 h-1 bg-gray-150 dark:bg-gray-800 rounded-full mx-10"/>
+            <div className="absolute top-5 left-0 h-1 mx-10 transition-all duration-500 rounded-full"
               style={{
                 width: isRejected ? '0%' : statusIdx >= 0 ? `${Math.min(100, (statusIdx / (WORKFLOW_STEPS.length-1)) * 100)}%` : '0%',
-                background: isRejected ? '#EF4444' : 'linear-gradient(90deg, #1A365D, #3182CE)',
+                background: isRejected ? '#EF4444' : 'linear-gradient(90deg, #3b82f6, #8b5cf6)',
                 maxWidth: 'calc(100% - 5rem)'
               }}
             />
@@ -328,18 +332,20 @@ export default function PermitDetailPage() {
               const isCurrent = step.key === p.status;
               const isRejectedStep = isRejected && i === statusIdx;
               return (
-                <div key={step.key} className="flex flex-col items-center relative z-10 flex-1">
+                <div key={step.key} className="flex flex-col items-center relative z-10 flex-1 group">
                   <div className={`
-                    w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300
-                    ${isCurrent ? 'ring-4 ring-blue-100 dark:ring-blue-900/40 shadow-lg' : ''}
-                    ${isRejectedStep ? 'bg-red-500 text-white shadow-lg shadow-red-500/30' :
-                      isActive ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/30' :
-                      'bg-gray-100 dark:bg-gray-700 text-gray-400'}
+                    w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-300
+                    ${isCurrent ? 'ring-4 ring-blue-400/20 dark:ring-blue-500/20 scale-110 shadow-md' : ''}
+                    ${isRejectedStep ? 'bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-lg shadow-red-500/30' :
+                      isActive ? 'bg-gradient-to-br from-blue-500 to-indigo-650 text-white shadow-lg shadow-blue-500/25' :
+                      'bg-gray-150 dark:bg-gray-800 text-gray-400 dark:text-gray-500'}
                   `}>
-                    {isRejectedStep ? <XCircle size={16}/> : isActive ? <Icon size={16}/> : <step.icon size={16}/>}
+                    {isRejectedStep ? <XCircle size={18}/> : isActive ? <Icon size={18}/> : <step.icon size={18}/>}
                   </div>
-                  <p className={`text-[10px] sm:text-xs font-semibold mt-2 text-center leading-tight ${isActive?'text-blue-600 dark:text-blue-400':'text-gray-400'}`}>{step.label}</p>
-                  <p className="text-[9px] text-gray-400 text-center hidden sm:block mt-0.5 leading-tight">{step.desc}</p>
+                  <p className={`text-[10px] sm:text-xs font-bold mt-3 text-center leading-tight transition-colors duration-250 ${
+                    isActive ? 'text-blue-600 dark:text-blue-400 font-extrabold' : 'text-gray-400 dark:text-gray-500'
+                  }`}>{step.label}</p>
+                  <p className="text-[9px] text-gray-400 dark:text-gray-505 text-center hidden sm:block mt-1 leading-tight max-w-[90px]">{step.desc}</p>
                 </div>
               );
             })}
@@ -486,17 +492,24 @@ export default function PermitDetailPage() {
       {/* Detail Data */}
       {Object.keys(det).length>0&&(
         <DetailCard title="Detail Data Permit" icon={<ClipboardList size={14} className="text-blue-500"/>}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {Object.entries(det).filter(([k])=>!['judul','lokasi','deskripsi','tanggal','pukul_mulai','pukul_selesai','departemen','jsa_id'].includes(k)).map(([k,v])=>{
               if(v===null||v===undefined||v==='') return null;
               const label=k.replace(/_/g,' ').replace(/\b\w/g,l=>l.toUpperCase());
               let display=String(v);
               if(Array.isArray(v))display=v.join(', ');
               else if(typeof v==='object')display=JSON.stringify(v);
+              const isImage = typeof v === 'string' && (v.startsWith('data:image/') || v.startsWith('http') || v.match(/\.(png|jpg|jpeg|gif|webp|svg)/i));
               return (
-                <div key={k} className="bg-gray-50 dark:bg-gray-700/50 p-2.5 rounded-lg border border-gray-100 dark:border-gray-600/50">
-                  <p className="text-[10px] text-gray-500 dark:text-gray-400 mb-0.5 uppercase tracking-wider">{label}</p>
-                  <p className="text-xs font-medium text-gray-800 dark:text-white leading-relaxed">{display}</p>
+                <div key={k} className={`bg-gray-50/50 dark:bg-gray-800/40 p-4 rounded-xl border border-gray-150 dark:border-gray-800/80 shadow-sm transition-all duration-200 hover:shadow-md ${isImage ? 'col-span-1 sm:col-span-2' : ''}`}>
+                  <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 mb-1.5 uppercase tracking-wider">{label}</p>
+                  {isImage ? (
+                    <div className="relative group max-w-full overflow-hidden rounded-xl border border-gray-250 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 mt-2 max-h-[300px] flex items-center justify-center">
+                      <img src={v} alt={label} className="object-contain max-h-[300px] w-auto max-w-full transition-transform duration-300 group-hover:scale-102" />
+                    </div>
+                  ) : (
+                    <p className="text-xs font-bold text-gray-800 dark:text-white leading-relaxed">{display}</p>
+                  )}
                 </div>
               );
             })}
@@ -506,9 +519,13 @@ export default function PermitDetailPage() {
 
       {p.jsa&&(
         <DetailCard title="JSA Terkait" icon={<ClipboardList size={14} className="text-blue-500"/>}>
-          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-100 dark:border-gray-600/50">
-            <p className="text-sm font-medium text-gray-800 dark:text-white">{p.jsa.kegiatan}</p>
-            <p className="text-xs text-gray-500 mt-1">{p.jsa.lokasi} &bull; {p.jsa.tanggal}</p>
+          <div className="bg-gray-50/50 dark:bg-gray-800/40 rounded-xl p-4 border border-gray-150 dark:border-gray-800/80 transition-all hover:shadow-md">
+            <p className="text-sm font-bold text-gray-800 dark:text-white">{p.jsa.kegiatan}</p>
+            <p className="text-xs text-gray-450 dark:text-gray-400 font-semibold mt-1.5 flex items-center gap-2">
+              <span>📍 {p.jsa.lokasi}</span>
+              <span className="text-gray-300 dark:text-gray-700">|</span>
+              <span>📅 {p.jsa.tanggal}</span>
+            </p>
           </div>
         </DetailCard>
       )}
@@ -516,17 +533,17 @@ export default function PermitDetailPage() {
       {/* Approval Notes */}
       {(p.catatan||p.catatan_reject)&&(
         <DetailCard title="Catatan Persetujuan" icon={<PenTool size={14} className="text-blue-500"/>}>
-          <div className="space-y-2">
+          <div className="space-y-3">
             {p.catatan&&(
-              <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border border-green-200 dark:border-green-800">
-                <p className="text-[10px] text-green-600 font-semibold uppercase tracking-wider mb-1">Persetujuan:</p>
-                <p className="text-sm text-green-700 dark:text-green-300">{p.catatan}</p>
+              <div className="bg-green-50/50 dark:bg-green-950/20 rounded-xl p-4 border border-green-100 dark:border-green-900/40">
+                <p className="text-[10px] text-green-600 dark:text-green-400 font-bold uppercase tracking-widest mb-1.5">Persetujuan:</p>
+                <p className="text-sm text-green-700 dark:text-green-300 font-semibold leading-relaxed">{p.catatan}</p>
               </div>
             )}
             {p.catatan_reject&&(
-              <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-3 border border-red-200 dark:border-red-800">
-                <p className="text-[10px] text-red-600 font-semibold uppercase tracking-wider mb-1">Penolakan:</p>
-                <p className="text-sm text-red-700 dark:text-red-300">{p.catatan_reject}</p>
+              <div className="bg-red-50/50 dark:bg-red-950/20 rounded-xl p-4 border border-red-100 dark:border-red-900/40">
+                <p className="text-[10px] text-red-600 dark:text-red-400 font-bold uppercase tracking-widest mb-1.5">Penolakan:</p>
+                <p className="text-sm text-red-700 dark:text-red-300 font-semibold leading-relaxed">{p.catatan_reject}</p>
               </div>
             )}
           </div>
@@ -535,7 +552,7 @@ export default function PermitDetailPage() {
 
       {/* Timestamps */}
       <DetailCard title="Riwayat Waktu" icon={<Clock size={14} className="text-blue-500"/>}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {p.submitted_at&&<TimestampItem label="Submitted" value={p.submitted_at}/>}
           {p.supervisor_approved_at&&<TimestampItem label="Disetujui Supervisor" value={p.supervisor_approved_at}/>}
           {p.supervisor_rejected_at&&<TimestampItem label="Ditolak Supervisor" value={p.supervisor_rejected_at} rejected/>}
@@ -549,6 +566,7 @@ export default function PermitDetailPage() {
 
     {/* Print View Overlay */}
       {showPrintView && (
+        <Portal>
         <div className="fixed inset-0 z-[9999] bg-white overflow-y-auto" id="print-preview-container">
           <div id="print-toolbar" className="sticky top-0 z-10 flex items-center justify-between px-6 py-3 bg-white border-b border-gray-200 shadow-sm">
             <h2 className="text-lg font-bold text-gray-800">Preview Cetak Laporan</h2>
@@ -565,10 +583,12 @@ export default function PermitDetailPage() {
             <PermitPrintView permit={p} />
           </div>
         </div>
+        </Portal>
       )}
 
       {/* JSA Print View Overlay */}
       {showJsaPrintView && (
+        <Portal>
         <div className="fixed inset-0 z-[9999] bg-white overflow-y-auto" id="jsa-print-preview-container">
           <div id="print-toolbar" className="sticky top-0 z-10 flex items-center justify-between px-6 py-3 bg-white border-b border-gray-200 shadow-sm">
             <h2 className="text-lg font-bold text-gray-800">Preview Cetak JSA</h2>
@@ -585,10 +605,12 @@ export default function PermitDetailPage() {
             <JsaPrintView permit={p} />
           </div>
         </div>
+        </Portal>
       )}
 
       {/* Delete Confirmation Modal (Responsive) */}
       {showDeleteConfirm && (
+        <Portal>
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 animate-fade-in" onClick={()=>setShowDeleteConfirm(false)}>
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
           <div className="relative bg-white dark:bg-gray-900 rounded-2xl p-5 sm:p-6 max-w-sm w-full shadow-2xl space-y-4 mx-3 sm:mx-0 animate-scale-in" onClick={e=>e.stopPropagation()}>
@@ -609,10 +631,12 @@ export default function PermitDetailPage() {
             </div>
           </div>
         </div>
+        </Portal>
       )}
 
       {/* JSA Edit Modal - Admin Only (Responsive) */}
       {showJsaEdit && (
+        <Portal>
         <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 animate-fade-in" onClick={() => setShowJsaEdit(false)}>
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
           <div className="relative bg-white dark:bg-gray-900 w-full h-full sm:h-auto sm:max-h-[90vh] sm:rounded-2xl sm:max-w-6xl xl:max-w-7xl sm:w-full shadow-2xl flex flex-col animate-slide-in-up" onClick={e => e.stopPropagation()}>
@@ -634,6 +658,7 @@ export default function PermitDetailPage() {
             </div>
           </div>
         </div>
+        </Portal>
       )}
     </>
   );
@@ -641,33 +666,42 @@ export default function PermitDetailPage() {
 
 function DetailCard({title,icon,children}:{title:string;icon?:React.ReactNode;children:React.ReactNode}) {
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-2xl p-4 sm:p-5 border border-gray-200 dark:border-gray-700 shadow-sm space-y-3 hover:shadow-lg hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200">
-      <h3 className="font-semibold text-gray-800 dark:text-white text-sm flex items-center gap-2">
-        {icon}{title}
+    <div className="bg-white dark:bg-gray-900/50 backdrop-blur-md rounded-2xl p-5 border border-gray-200/80 dark:border-gray-800 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] space-y-4 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:border-blue-500/30 dark:hover:border-blue-500/20 transition-all duration-300 relative overflow-hidden group">
+      {/* Decorative top glass glow */}
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500/20 via-violet-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <h3 className="font-bold text-gray-800 dark:text-white text-sm flex items-center gap-2.5 pb-2 border-b border-gray-100 dark:border-gray-800/80">
+        {icon && <span className="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 shrink-0">{icon}</span>}
+        <span className="tracking-wide">{title}</span>
       </h3>
-      {children}
+      <div className="space-y-2">
+        {children}
+      </div>
     </div>
   );
 }
 
 function InfoRow({label,value,icon}:{label:string;value:string;icon?:React.ReactNode}) {
   return (
-    <div className="flex items-start gap-2 text-xs py-1">
-      <span className="text-gray-400 mt-0.5 flex-shrink-0">{icon}</span>
-      <span className="text-gray-500 min-w-[80px]">{label}:</span>
-      <span className="font-medium text-gray-800 dark:text-white">{value}</span>
+    <div className="flex items-center gap-2.5 text-xs py-2 px-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
+      {icon && <span className="text-blue-500 dark:text-blue-400 shrink-0">{icon}</span>}
+      <span className="text-gray-450 dark:text-gray-400 font-semibold min-w-[90px]">{label}</span>
+      <span className="font-bold text-gray-800 dark:text-white truncate">{value}</span>
     </div>
   );
 }
 
 function TimestampItem({label,value,rejected}:{label:string;value:string;rejected?:boolean}) {
   return (
-    <div className={`flex items-center gap-2 p-2 rounded-lg ${rejected?'bg-red-50 dark:bg-red-900/20':'bg-gray-50 dark:bg-gray-700/50'}`}>
-      <Clock size={12} className={rejected?'text-red-400':'text-gray-400'}/>
-      <div>
-        <p className={`text-[10px] font-semibold uppercase tracking-wider ${rejected?'text-red-500':'text-gray-500'}`}>{label}</p>
-        <p className="text-xs text-gray-800 dark:text-white font-medium">
-          {new Date(value).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}
+    <div className={`flex items-center gap-3.5 p-3 rounded-xl border transition-all ${
+      rejected
+        ? 'bg-red-50/50 dark:bg-red-950/20 border-red-100 dark:border-red-900/40'
+        : 'bg-gray-50/50 dark:bg-gray-800/40 border-gray-100 dark:border-gray-850'
+    }`}>
+      <Clock size={14} className={rejected ? 'text-red-500' : 'text-blue-500'} />
+      <div className="min-w-0 flex-1">
+        <p className={`text-[9px] font-bold uppercase tracking-widest ${rejected ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>{label}</p>
+        <p className="text-xs text-gray-805 dark:text-white font-bold mt-0.5">
+          {new Date(value).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})} WIB
         </p>
       </div>
     </div>

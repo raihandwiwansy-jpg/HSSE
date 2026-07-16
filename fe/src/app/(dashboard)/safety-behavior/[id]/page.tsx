@@ -42,7 +42,7 @@ export default function SafetyBehaviorDetailPage() {
   const p: SafetyBehavior | undefined = pData?.data?.data;
 
   const reviewMut = useMutation({
-    mutationFn: ({ id, c }: { id: number; c?: string }) => reviewSafetyBehavior(id, c),
+    mutationFn: ({ id, c, action }: { id: number; c?: string, action: 'approve' | 'reject' }) => reviewSafetyBehavior(id, c, action),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['safety-behavior', params.id] }); qc.invalidateQueries({ queryKey: ['safety-behaviors'] }); qc.invalidateQueries({ queryKey: ['safety-behavior-status-counts'] }); toast.success('Safety behavior dikonfirmasi!'); setShowReview(false); setCatatanReview(''); },
     onError: (e: any) => toast.error(e?.response?.data?.message || 'Gagal'),
   });
@@ -67,7 +67,9 @@ export default function SafetyBehaviorDetailPage() {
   );
 
   const od = p.observation_data || {} as any;
-  const canConfirm = p.status === 'menunggu' && user?.role === 'admin';
+  const canConfirmKasubag = (user?.role === 'kasubag' || user?.role === 'admin') && p.admin_status === 'pending';
+  const canConfirmAudit = user?.role === 'audit' && p.audit_status === 'pending';
+  const canConfirm = p.status === 'menunggu' && (canConfirmKasubag || canConfirmAudit);
   const canDelete = (user?.role === 'admin') || (user?.role === 'user' && p.status === 'menunggu');
 
   return (
@@ -86,7 +88,11 @@ export default function SafetyBehaviorDetailPage() {
           </div>
         </div>
         <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-          {canConfirm && !showReview && <Button variant="success" size="sm" onClick={() => setShowReview(true)}><CheckCircle size={14} /> Konfirmasi Selesai</Button>}
+          {canConfirm && !showReview && (
+            <Button variant="success" size="sm" onClick={() => setShowReview(true)}>
+              <CheckCircle size={14} /> Review Laporan
+            </Button>
+          )}
           <Button variant="outline" size="sm" onClick={() => setShowPrintView(true)}>
             <Printer size={14} /> Cetak Laporan
           </Button>
@@ -99,7 +105,12 @@ export default function SafetyBehaviorDetailPage() {
           <div className="flex items-center gap-2"><CheckCircle size={18} className="text-green-600" /><label className="text-sm font-semibold text-gray-700">Konfirmasi Safety Behavior Selesai</label></div>
           <textarea className="hse-input min-h-[80px] text-sm" value={catatanReview} onChange={e => setCatatanReview(e.target.value)} placeholder="Tambahkan catatan (opsional)..." />
           <div className="flex items-center gap-2">
-            <Button size="sm" onClick={() => reviewMut.mutate({ id: p.id, c: catatanReview })} isLoading={reviewMut.isPending}><CheckCircle size={14} /> Ya, Konfirmasi</Button>
+            <Button size="sm" onClick={() => reviewMut.mutate({ id: p.id, c: catatanReview, action: 'approve' })} isLoading={reviewMut.isPending}>
+              <CheckCircle size={14} /> Setujui
+            </Button>
+            <Button variant="danger" size="sm" onClick={() => reviewMut.mutate({ id: p.id, c: catatanReview, action: 'reject' })} isLoading={reviewMut.isPending}>
+              Tolak
+            </Button>
             <Button variant="outline" size="sm" onClick={() => { setShowReview(false); setCatatanReview(''); }}>Batal</Button>
           </div>
         </div>
@@ -119,7 +130,6 @@ export default function SafetyBehaviorDetailPage() {
         </DetailCard>
       </div>
 
-      {/* Kategori Perilaku */}
       {od.kategori_perilaku && (
         <div className="bg-white dark:bg-gray-900 rounded-2xl p-4 sm:p-5 border border-gray-200 dark:border-gray-700 shadow-sm">
           <h3 className="font-semibold text-gray-800 dark:text-white text-sm mb-3 flex items-center gap-2">
@@ -131,7 +141,6 @@ export default function SafetyBehaviorDetailPage() {
         </div>
       )}
 
-      {/* Observation Checklist Results */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
         {Object.entries(CATEGORY_LABELS).map(([key, label]) => {
           const cat = od[key];
@@ -159,12 +168,10 @@ export default function SafetyBehaviorDetailPage() {
         })}
       </div>
 
-      {/* Observation Report Fields */}
       {od.aktivitas && <DetailCard title="Aktifitas yang dilakukan"><p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{od.aktivitas}</p></DetailCard>}
       {od.observasi_perilaku && <DetailCard title="Observasi perilaku"><p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{od.observasi_perilaku}</p></DetailCard>}
       {od.alasan_beresiko && <DetailCard title="Alasan perilaku beresiko dilakukan"><p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{od.alasan_beresiko}</p></DetailCard>}
 
-      {/* Tindakan Perbaikan */}
       {od.perlu_tindakan && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           {p.tindakan_perbaikan && (
@@ -180,7 +187,6 @@ export default function SafetyBehaviorDetailPage() {
         </div>
       )}
 
-      {/* Foto */}
       {p.foto && p.foto.length > 0 && (
         <DetailCard title="Dokumentasi Foto" icon={<Camera size={14} className="text-blue-500" />}>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
@@ -194,7 +200,6 @@ export default function SafetyBehaviorDetailPage() {
         </DetailCard>
       )}
 
-      {/* Catatan Konfirmasi */}
       {p.catatan && (
         <DetailCard title="Catatan" icon={<ClipboardCheck size={14} className="text-green-500" />}>
           <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border border-green-200 dark:border-green-800">
@@ -203,15 +208,23 @@ export default function SafetyBehaviorDetailPage() {
         </DetailCard>
       )}
 
-      {/* Timestamps */}
-      <DetailCard title="Riwayat Waktu" icon={<Clock size={14} className="text-blue-500" />}>
+      <DetailCard title="Status & Riwayat Waktu" icon={<Clock size={14} className="text-blue-500" />}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+            <p className="text-xs font-bold text-gray-500 uppercase mb-1">Status Kasubag (Pak Oka)</p>
+            <StatusBadge status={p.admin_status || 'pending'} />
+          </div>
+          <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+            <p className="text-xs font-bold text-gray-500 uppercase mb-1">Status Audit</p>
+            <StatusBadge status={p.audit_status || 'pending'} />
+          </div>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {p.submitted_at && <TimestampItem label="Dibuat" value={p.submitted_at} />}
           {p.reviewed_at && <TimestampItem label="Dikonfirmasi" value={p.reviewed_at} />}
         </div>
       </DetailCard>
 
-      {/* Delete Confirmation (Responsive) */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 animate-fade-in" onClick={() => setShowDeleteConfirm(false)}>
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />

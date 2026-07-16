@@ -68,14 +68,9 @@ class InsidenController extends Controller
     {
         $user = $request->user();
 
-        // Supervisor blocked
-        if ($user->role === 'supervisor') {
-            return $this->error('Supervisor tidak memiliki akses ke modul ini', 403);
-        }
-
-        // Hanya USER yang bisa lapor (Admin tidak bisa)
-        if ($user->role !== 'user') {
-            return $this->error('Hanya Karyawan yang dapat membuat laporan insiden', 403);
+        // Hanya Admin & Kasubag yang bisa lapor
+        if (!in_array($user->role, ['admin', 'kasubag'])) {
+            return $this->error('Hanya Admin HSE dan Kasubag yang dapat membuat laporan insiden', 403);
         }
 
         $validated = $request->validate([
@@ -158,8 +153,8 @@ class InsidenController extends Controller
             return $this->error('Insiden tidak ditemukan', 404);
         }
 
-        // Hanya pembuat (user) yang bisa update datanya sendiri jika masih pending
-        if ($user->role === 'user') {
+        // Hanya pembuat (admin/kasubag) yang bisa update datanya sendiri jika masih pending
+        if (in_array($user->role, ['admin', 'kasubag'])) {
             if ($insiden->user_id !== $user->id) {
                 return $this->error('Anda tidak memiliki akses untuk mengubah data ini', 403);
             }
@@ -167,8 +162,7 @@ class InsidenController extends Controller
                 return $this->error('Laporan insiden yang sedang diproses tidak dapat diubah', 400);
             }
         } else {
-            // Admin tidak bisa update konten, hanya status (via updateStatus)
-            return $this->error('Admin hanya dapat memperbarui status laporan insiden', 403);
+            return $this->error('Anda tidak memiliki akses untuk mengubah data ini', 403);
         }
 
         $validated = $request->validate([

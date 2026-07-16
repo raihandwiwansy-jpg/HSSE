@@ -37,8 +37,8 @@ export const submitSafetyBehavior = (id: number) => {
   return api.post(`/safety-behavior/${id}/submit`);
 };
 
-export const reviewSafetyBehavior = (id: number, catatan?: string) => {
-  return api.post(`/safety-behavior/${id}/review`, { catatan });
+export const reviewSafetyBehavior = (id: number, catatan?: string, action?: string) => {
+  return api.post(`/safety-behavior/${id}/review`, { catatan, action });
 };
 
 export const getSafetyBehaviorStatusCounts = () => {

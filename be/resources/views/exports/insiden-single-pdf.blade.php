@@ -4,56 +4,57 @@
     <meta charset="utf-8">
     <title>Laporan Insiden #{{ $data->id }}</title>
     <style>
-        @page { margin: 25px; }
+        @page { margin: 15px; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Helvetica', 'Arial', sans-serif; font-size: 10px; color: #333; line-height: 1.4; }
-        .container { padding: 10px; }
+        body { font-family: 'Helvetica', 'Arial', sans-serif; font-size: 9px; color: #000; line-height: 1.35; }
+        .container { padding: 8px; }
 
         /* Corporate Header Table */
-        .header-tbl { width: 100%; border-collapse: collapse; border: 1.5px solid #000; margin-bottom: 12px; }
-        .header-tbl td, .header-tbl th { border: 1px solid #000; padding: 4px; vertical-align: middle; text-align: center; }
+        .header-tbl { width: 100%; border-collapse: collapse; border: 1.5px solid #000; margin-bottom: 10px; }
+        .header-tbl td, .header-tbl th { border: 1px solid #000; padding: 3px; vertical-align: middle; text-align: center; }
         .header-logo { width: 15%; }
-        .header-logo img { max-height: 40px; display: block; margin: 0 auto; }
+        .header-logo img { max-height: 38px; display: block; margin: 0 auto; }
         .header-title-area { width: 50%; text-align: center; }
-        .header-title-main { font-size: 12px; font-weight: bold; text-transform: uppercase; }
-        .header-title-sub { font-size: 8px; font-weight: bold; text-transform: uppercase; margin-top: 1px; }
-        .header-address { font-size: 6.5px; margin-top: 1px; line-height: 1.2; }
-        .header-meta-label { width: 17.5%; font-weight: bold; font-size: 8px; text-transform: uppercase; }
-        .header-meta-val { width: 17.5%; font-size: 8px; font-weight: 600; }
-        .header-doc-title { font-size: 9px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.3px; }
+        .header-title-main { font-size: 10px; font-weight: bold; text-transform: uppercase; }
+        .header-title-sub { font-size: 7px; font-weight: bold; text-transform: uppercase; margin-top: 1px; }
+        .header-address { font-size: 5.5px; margin-top: 1px; line-height: 1.1; }
+        .header-meta-label { width: 17.5%; font-weight: bold; font-size: 7px; text-transform: uppercase; }
+        .header-meta-val { width: 17.5%; font-size: 7px; font-weight: 600; }
+        .header-doc-title { font-size: 8px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.3px; }
 
         /* Section Layout */
-        .section { margin-bottom: 12px; }
-        .section-title { font-size: 10px; font-weight: bold; background-color: #f2f2f2; border: 1px solid #000; padding: 4px 6px; text-transform: uppercase; margin-bottom: 6px; }
+        .section { margin-bottom: 10px; }
+        .section-title { font-size: 8.5px; font-weight: bold; background-color: #f2f2f2; border: 1px solid #000; padding: 3px 5px; text-transform: uppercase; margin-bottom: 5px; }
         
         /* Form Table Style */
-        .info-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
-        .info-table td { border: 1px solid #ddd; padding: 6px 8px; vertical-align: top; font-size: 9px; }
+        .info-table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
+        .info-table td { border: 1px solid #000; padding: 5px 7px; vertical-align: top; font-size: 8.5px; }
         .info-table td.label-cell { font-weight: bold; background-color: #fafafa; width: 25%; }
         .info-table td.value-cell { width: 75%; }
 
-        .badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-weight: bold; font-size: 8px; text-transform: uppercase; }
-        .badge-pending { background-color: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
-        .badge-investigation { background-color: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
-        .badge-resolved { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
-        .badge-closed { background-color: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; }
+        .badge { display: inline-block; padding: 1px 6px; border-radius: 3px; font-weight: bold; font-size: 7.5px; text-transform: uppercase; border: 1px solid transparent; }
+        .badge-pending { background-color: #fef3c7; color: #92400e; border-color: #fcd34d; }
+        .badge-investigation { background-color: #dbeafe; color: #1e40af; border-color: #bfdbfe; }
+        .badge-resolved { background-color: #d1fae5; color: #065f46; border-color: #a7f3d0; }
+        .badge-closed { background-color: #f3f4f6; color: #374151; border-color: #e5e7eb; }
 
-        .badge-kecelakaan { background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
-        .badge-near_miss { background-color: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
-        .badge-unsafe_condition { background-color: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+        .badge-kecelakaan { background-color: #fee2e2; color: #991b1b; border-color: #fca5a5; }
+        .badge-near_miss { background-color: #fef3c7; color: #92400e; border-color: #fcd34d; }
+        .badge-unsafe_condition { background-color: #e0f2fe; color: #0369a1; border-color: #bae6fd; }
 
         /* Photo Area */
-        .photo-container { text-align: center; margin: 10px 0; border: 1px solid #ddd; padding: 8px; background-color: #fafafa; border-radius: 4px; }
-        .photo-img { max-width: 280px; max-height: 200px; border: 1px solid #bbb; }
+        .photo-container { text-align: center; margin: 8px 0; border: 1px solid #000; padding: 8px; background-color: #fafafa; border-radius: 4px; }
+        .photo-img { max-width: 480px; max-height: 320px; border: 1px solid #bbb; display: inline-block; object-fit: contain; }
 
-        /* Signatures */
-        .sig-table { width: 100%; border-collapse: collapse; margin-top: 30px; }
-        .sig-table td { width: 50%; text-align: center; vertical-align: top; padding: 5px; border: none; }
-        .sig-title { font-weight: bold; font-size: 9px; margin-bottom: 50px; text-transform: uppercase; }
-        .sig-name { font-weight: bold; font-size: 9px; text-decoration: underline; }
-        .sig-dept { font-size: 8px; color: #666; margin-top: 2px; }
+        /* Signatures Grid */
+        .sign-tbl { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .sign-tbl td { border: 1px solid #000; padding: 5px; text-align: center; font-size: 7.5px; width: 50%; }
+        .sign-header { font-weight: bold; background-color: #f2f2f2; text-transform: uppercase; }
+        .sign-space { height: 35px; }
+        .sign-name { font-weight: bold; border-top: 0.5px solid #000; padding-top: 1px; display: inline-block; min-width: 120px; }
+        .sign-dept { font-size: 7px; color: #555; margin-top: 1px; }
 
-        .footer-note { font-size: 7px; color: #777; text-align: center; margin-top: 20px; border-top: 0.5px solid #ccc; padding-top: 4px; }
+        .footer-note { font-size: 6px; color: #555; text-align: center; margin-top: 15px; border-top: 0.5px solid #ccc; padding-top: 3px; }
     </style>
 </head>
 <body>
@@ -143,7 +144,7 @@
             <div class="section-title">Deskripsi Kronologi Kejadian</div>
             <table class="info-table">
                 <tr>
-                    <td style="padding: 10px; line-height: 1.6; font-size: 9.5px; white-space: pre-wrap;">{{ $data->deskripsi }}</td>
+                    <td style="padding: 8px; line-height: 1.5; font-size: 8.5px; white-space: pre-wrap; border: 1px solid #000;">{{ $data->deskripsi }}</td>
                 </tr>
             </table>
         </div>
@@ -151,7 +152,10 @@
         <!-- Section: Lampiran Foto Bukti -->
         @if($data->foto)
             @php
-                $photoPath = public_path('storage/' . $data->foto);
+                $photoPath = storage_path('app/public/' . $data->foto);
+                if (!file_exists($photoPath)) {
+                    $photoPath = public_path('storage/' . $data->foto);
+                }
                 $fileExists = file_exists($photoPath);
             @endphp
             @if($fileExists)
@@ -165,24 +169,28 @@
         @endif
 
         <!-- Section: Tanda Tangan Pengesahan -->
-        <table class="sig-table" style="page-break-inside: avoid;">
+        <table class="sign-tbl" style="page-break-inside: avoid;">
+            <tr>
+                <td class="sign-header">Pelapor Kejadian</td>
+                <td class="sign-header">Mengetahui (HSE Dept)</td>
+            </tr>
             <tr>
                 <td>
-                    <div class="sig-title">Pelapor Kejadian</div>
-                    <div class="sig-name">{{ $data->user->name ?? '-' }}</div>
-                    <div class="sig-dept">Karyawan Bersangkutan</div>
+                    <div class="sign-space"></div>
+                    <div class="sign-name">{{ $data->user->name ?? '________________' }}</div>
+                    <div class="sign-dept">Karyawan / Staff Pelapor</div>
                 </td>
                 <td>
-                    <div class="sig-title">HSE Officer / Admin Dept</div>
-                    <div class="sig-name">...........................................</div>
-                    <div class="sig-dept">Health, Safety, & Environment</div>
+                    <div class="sign-space"></div>
+                    <div class="sign-name">...........................................</div>
+                    <div class="sign-dept">HSE Officer / Kasubag HSE</div>
                 </td>
             </tr>
         </table>
 
         <!-- Footer -->
         <div class="footer-note">
-            Dokumen ini dicetak secara resmi melalui Portal Sistem Informasi Keselamatan Kerja PT. Industri Nabati Lestari.
+            Dicetak otomatis oleh Sistem HSE - PT. Industri Nabati Lestari &bull; Waktu Cetak: {{ \Carbon\Carbon::now()->format('d/m/Y H:i') }}
         </div>
     </div>
 </body>

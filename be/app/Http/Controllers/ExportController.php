@@ -365,6 +365,141 @@ class ExportController extends Controller
     public function exportRwpExcel(Request $request) { return $this->rwpExcel($request); }
     public function exportRwpPdf(Request $request) { return $this->rwpPdf($request); }
 
+    public function exportManHoursExcel(Request $request)
+    {
+        $year = $request->query('tahun', date('Y'));
+        
+        // Use the existing template copied to storage
+        $templatePath = storage_path('app/templates/man_hours_template.xlsx');
+        if (!file_exists($templatePath)) {
+            return $this->error('Template excel tidak ditemukan', 500);
+        }
+
+        // Load the template
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($templatePath);
+        
+        // We will target the 'rekap' sheet
+        $sheet = $spreadsheet->getSheetByName('rekap');
+        if (!$sheet) {
+            return $this->error('Sheet rekap tidak ditemukan di template', 500);
+        }
+
+        // Find the "TOTAL MAN HOURS" row dynamically in column A
+        $totalRow = null;
+        $highestRow = $sheet->getHighestRow();
+        for ($r = 5; $r <= $highestRow; $r++) {
+            $val = trim($sheet->getCell("A{$r}")->getValue());
+            if (strcasecmp($val, 'TOTAL MAN HOURS') === 0) {
+                $totalRow = $r;
+                break;
+            }
+        }
+        if (!$totalRow) {
+            $totalRow = 101; // fallback
+        }
+
+        // Determine the maximum year already in the sheet
+        $maxYearInSheet = 2019 + (int)floor(($totalRow - 5) / 12) - 1;
+
+        // Fetch all monthly man hours from database
+        $records = \App\Models\MonthlyManHour::orderBy('tahun')->get();
+        $maxRecordYear = $records->max('tahun') ? (int)$records->max('tahun') : (int)$year;
+
+        $months = ['Januari', 'februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+        // Dynamically insert rows if database contains years beyond what's currently in the sheet
+        while ($maxRecordYear > $maxYearInSheet) {
+            $newYear = $maxYearInSheet + 1;
+            
+            // Insert 12 rows before the totalRow
+            $sheet->insertNewRowBefore($totalRow, 12);
+            
+            // Initialize default values, formulas and months for the new year block
+            for ($i = 0; $i < 12; $i++) {
+                $row = $totalRow + $i;
+                if ($i === 0) {
+                    $sheet->setCellValue("A{$row}", $newYear);
+                }
+                $sheet->setCellValue("B{$row}", $months[$i]);
+                $sheet->setCellValue("C{$row}", 0);
+                $sheet->setCellValue("D{$row}", 0);
+                $sheet->setCellValue("E{$row}", 0);
+                $sheet->setCellValue("F{$row}", "=SUM(C{$row}:E{$row})");
+                $sheet->setCellValue("G{$row}", 0);
+                $sheet->setCellValue("H{$row}", 0);
+                $sheet->setCellValue("I{$row}", 0);
+                $sheet->setCellValue("J{$row}", 0);
+                $sheet->setCellValue("K{$row}", "=SUM(G{$row}:J{$row})");
+                $sheet->setCellValue("L{$row}", 0);
+                $sheet->setCellValue("M{$row}", "=K{$row}-L{$row}");
+            }
+            
+            $totalRow += 12;
+            $maxYearInSheet++;
+        }
+
+        // Populate monthly records from database into the sheet
+        foreach ($records as $record) {
+            $recYear = (int)$record->tahun;
+            $recMonth = $record->bulan;
+            
+            $monthIndex = array_search(strtolower($recMonth), array_map('strtolower', $months));
+            if ($monthIndex === false) {
+                continue;
+            }
+            
+            if ($recYear >= 2019) {
+                $startRow = 5 + ($recYear - 2019) * 12;
+                $row = $startRow + $monthIndex;
+                
+                // Write year to Column A only on the first month
+                if ($monthIndex === 0) {
+                    $sheet->setCellValue("A{$row}", $recYear);
+                }
+                $sheet->setCellValue("B{$row}", $recMonth);
+                
+                // Manpower values
+                $sheet->setCellValue("C{$row}", $record->manpower_inl);
+                $sheet->setCellValue("D{$row}", $record->manpower_kontraktor);
+                $sheet->setCellValue("E{$row}", $record->manpower_outsourcing);
+                $sheet->setCellValue("F{$row}", "=SUM(C{$row}:E{$row})");
+                
+                // Man Hours values
+                $sheet->setCellValue("G{$row}", $record->normal_jam_inl);
+                $sheet->setCellValue("H{$row}", $record->overtime_inl);
+                $sheet->setCellValue("I{$row}", $record->normal_jam_kontraktor + $record->overtime_kontraktor);
+                $sheet->setCellValue("J{$row}", $record->normal_jam_outsourcing + $record->overtime_outsourcing);
+                $sheet->setCellValue("K{$row}", "=SUM(G{$row}:J{$row})");
+                
+                // Cuti / Izin / Sakit and Sub total
+                $sheet->setCellValue("L{$row}", $record->cuti_sakit);
+                $sheet->setCellValue("M{$row}", "=K{$row}-L{$row}");
+            }
+        }
+
+        // Update formulas in the "TOTAL MAN HOURS" row
+        $sheet->setCellValue("G{$totalRow}", "=SUM(G5:G" . ($totalRow - 1) . ")");
+        $sheet->setCellValue("J{$totalRow}", "=SUM(I5:J" . ($totalRow - 1) . ")");
+        $sheet->setCellValue("M{$totalRow}", "=SUM(M5:M" . ($totalRow - 1) . ")");
+
+        // Update formula in the cumulative cell (usually contains P18)
+        $highestRow = $sheet->getHighestRow();
+        for ($r = $totalRow + 1; $r <= $highestRow; $r++) {
+            $val = trim($sheet->getCell("M{$r}")->getValue());
+            if (strpos($val, 'P18') !== false) {
+                $sheet->setCellValue("M{$r}", "=P18+M{$totalRow}");
+                break;
+            }
+        }
+
+        return response()->streamDownload(function() use ($spreadsheet) {
+            $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
+            $writer->save('php://output');
+        }, "Rekap_Man_Hours_{$year}.xlsx", [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
+    }
+
     // ==================== SINGLE PDF EXPORTS ====================
 
     public function insidenSinglePdf($id)

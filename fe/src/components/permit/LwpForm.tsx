@@ -75,10 +75,7 @@ export default function LwpForm({ data, onChange }: LwpFormProps) {
       {/* General Information */}
       <Sec title="Informasi Umum">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300">Perusahaan/Kontraktor</label>
-            <MasterSelect masterType="perusahaan" value={(data.perusahaan as string)||''} onChange={(v) => u('perusahaan', v)} placeholder="Pilih perusahaan..." />
-          </div>
+          <Input label="Perusahaan/Kontraktor" name="perusahaan" value={(data.perusahaan as string)||''} onChange={e=>u('perusahaan',e.target.value)} register={()=>({})} placeholder="Nama Perusahaan" />
           <Input label="Tanggal" name="tanggal" type="date" value={(data.tanggal as string)||''} onChange={e=>u('tanggal',e.target.value)} register={()=>({})} />
         </div>
         <div className="space-y-1.5">

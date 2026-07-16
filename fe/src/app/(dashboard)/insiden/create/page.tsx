@@ -5,17 +5,38 @@ import { useMutation } from '@tanstack/react-query';
 import { createInsiden } from '@/lib/api/insiden';
 import Button from '@/components/ui/Button';
 import { toast } from 'react-toastify';
-import { ChevronLeft, Save } from 'lucide-react';
-import WebcamCapture from '@/components/ui/WebcamCapture';
+import { ChevronLeft, Save, ShieldAlert } from 'lucide-react';
+import CameraCapture from '@/components/ui/CameraCapture';
+import { useAuth } from '@/hooks/useAuth';
+interface PhotoItem { file: File; preview: string; }
 
 export default function CreateInsidenPage() {
   const router = useRouter();
+  const { user } = useAuth();
+
+  if (user && user.role !== 'admin' && user.role !== 'kasubag') {
+    return (
+      <div className="p-6 bg-white dark:bg-gray-900 rounded-2xl border border-red-200 dark:border-red-900/30 text-center max-w-md mx-auto my-12 shadow-sm animate-fade-in-up">
+        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-red-50 dark:bg-red-950/20 flex items-center justify-center text-red-600 dark:text-red-400">
+          <ShieldAlert size={32} />
+        </div>
+        <h2 className="text-lg font-bold text-gray-850 dark:text-white">Akses Ditolak</h2>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+          Anda tidak memiliki akses ke modul Laporan Insiden. Silakan kembali ke Dashboard.
+        </p>
+        <Button onClick={() => router.push('/dashboard')} size="sm" className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold">
+          Kembali ke Dashboard
+        </Button>
+      </div>
+    );
+  }
+
   const [judul, setJudul] = useState('');
   const [jenis, setJenis] = useState('');
   const [lokasi, setLokasi] = useState('');
   const [tanggal, setTanggal] = useState(new Date().toISOString().split('T')[0]);
   const [deskripsi, setDeskripsi] = useState('');
-  const [fotoData, setFotoData] = useState<string | File | null>(null);
+  const [photos, setPhotos] = useState<PhotoItem[]>([]);
 
   const mut = useMutation({
     mutationFn: createInsiden,
@@ -29,9 +50,6 @@ export default function CreateInsidenPage() {
     },
   });
 
-  const handleCapture = (data: string | File | null) => {
-    setFotoData(data);
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,10 +65,8 @@ export default function CreateInsidenPage() {
     formData.append('tanggal_kejadian', tanggal);
     formData.append('deskripsi', deskripsi);
 
-    if (fotoData instanceof File) {
-      formData.append('foto_file', fotoData);
-    } else if (typeof fotoData === 'string') {
-      formData.append('foto', fotoData);
+    if (photos.length > 0) {
+      formData.append('foto_file', photos[0].file);
     }
 
     mut.mutate(formData);
@@ -180,7 +196,7 @@ export default function CreateInsidenPage() {
             <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 ml-1">
               Foto Bukti Pendukung <span className="text-gray-400 font-normal">(Opsional)</span>
             </label>
-            <WebcamCapture onCapture={handleCapture} />
+            <CameraCapture photos={photos} onChange={setPhotos} maxPhotos={1} />
           </div>
 
           {/* Form Submit Footer */}

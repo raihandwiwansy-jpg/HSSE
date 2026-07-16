@@ -100,10 +100,7 @@ export default function EwpForm({ data, onChange }: EwpFormProps) {
       <Sec title="SECTION A: Permohonan Izin Kerja Galian">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Input label="Nama" name="nama_pemohon" value={(data.nama_pemohon as string)||''} onChange={e=>u('nama_pemohon',e.target.value)} register={()=>({})} />
-          <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300">Perusahaan</label>
-            <MasterSelect masterType="perusahaan" value={(data.perusahaan as string)||''} onChange={(v) => u('perusahaan', v)} placeholder="Pilih perusahaan..." />
-          </div>
+          <Input label="Perusahaan" name="perusahaan" value={(data.perusahaan as string)||''} onChange={e=>u('perusahaan',e.target.value)} register={()=>({})} placeholder="Nama Perusahaan" />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Input label="Masa Berlaku Izin Galian Mulai" name="masa_mulai" type="date" value={(data.masa_mulai as string)||''} onChange={e=>u('masa_mulai',e.target.value)} register={()=>({})} />
@@ -145,11 +142,11 @@ export default function EwpForm({ data, onChange }: EwpFormProps) {
       <Sec title="SECTION B: Pemeriksaan Fasilitas Bawah Tanah">
         <div className="flex gap-4 mb-3">
           <label className="flex items-center gap-2 cursor-pointer">
-            <input type="radio" name="fasilitas_bwh" checked={data.tidak_ada_fasilitas===true} onChange={()=>{u('tidak_ada_fasilitas',true);u('ada_fasilitas',false);}} className="text-blue-500"/>
+            <input type="radio" name="fasilitas_bwh" checked={data.tidak_ada_fasilitas===true || data.tidak_ada_fasilitas==='true' || data.tidak_ada_fasilitas===1} onChange={()=>onChange({...data, tidak_ada_fasilitas: true, ada_fasilitas: false})} className="text-blue-500"/>
             <span className="text-sm">Tidak ada fasilitas tertanam dibawah tanah</span>
           </label>
           <label className="flex items-center gap-2 cursor-pointer">
-            <input type="radio" name="fasilitas_bwh" checked={data.ada_fasilitas===true} onChange={()=>{u('ada_fasilitas',true);u('tidak_ada_fasilitas',false);}} className="text-blue-500"/>
+            <input type="radio" name="fasilitas_bwh" checked={data.ada_fasilitas===true || data.ada_fasilitas==='true' || data.ada_fasilitas===1} onChange={()=>onChange({...data, ada_fasilitas: true, tidak_ada_fasilitas: false})} className="text-blue-500"/>
             <span className="text-sm">Ada fasilitas bawah tanah, tandai dilapangan dan digambar</span>
           </label>
         </div>
@@ -157,6 +154,22 @@ export default function EwpForm({ data, onChange }: EwpFormProps) {
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Uraian Keterangan Fasilitas dibawah Lahan</label>
           <textarea className="hse-input min-h-[60px] text-sm" value={(data.detail_fasilitas as string)||''} onChange={e=>u('detail_fasilitas',e.target.value)} placeholder="Tandai dilapangan dan gambarkan..."/>
         </div>
+        {(data.ada_fasilitas === true || data.ada_fasilitas === 'true' || data.ada_fasilitas === 1) && (
+          <div className="space-y-2 mt-2 bg-white dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Upload Sketsa/Gambar Fasilitas</label>
+            <input type="file" accept="image/*" onChange={(e) => {
+               const file = e.target.files?.[0];
+               if (file) {
+                 const reader = new FileReader();
+                 reader.onload = (ev) => u('gambar_fasilitas', ev.target?.result);
+                 reader.readAsDataURL(file);
+               }
+             }} className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+             {data.gambar_fasilitas && (
+               <img src={data.gambar_fasilitas as string} alt="Sketsa Fasilitas" className="mt-2 max-h-48 object-contain rounded border border-gray-200" />
+             )}
+          </div>
+        )}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Input label="Operating Pressure / Operating Voltage" name="operating_pressure" value={(data.operating_pressure as string)||''} onChange={e=>u('operating_pressure',e.target.value)} register={()=>({})} placeholder="Operating Pressure/Voltage"/>
           <Input label="Ada dikedalaman Berikut (m)" name="kedalaman_fasilitas" type="number" value={(data.kedalaman_fasilitas as string)||''} onChange={e=>u('kedalaman_fasilitas',e.target.value)} register={()=>({})} placeholder="Kedalaman fasilitas"/>
@@ -409,7 +422,7 @@ export default function EwpForm({ data, onChange }: EwpFormProps) {
           'no_dokumen','tgl_berlaku','no_revisi','halaman','no_permit_ewp','dept','tanggal','shift_kerja',
           'nama_pemohon','perusahaan','masa_mulai','masa_selesai','lokasi','metode','panjang','lebar','kedalaman',
           'uraian_pekerjaan','sec_a_tanggal','sec_a_nama','sec_a_tt',
-          'tidak_ada_fasilitas','ada_fasilitas','detail_fasilitas','operating_pressure','kedalaman_fasilitas',
+          'tidak_ada_fasilitas','ada_fasilitas','detail_fasilitas','gambar_fasilitas','operating_pressure','kedalaman_fasilitas',
           'gambar_diperiksa_oleh','sec_b_tanggal','sec_b_tt',
           'bahaya_ewp','bahaya_lain',
           'mencegah_tertimbun','electrical_services','petugas_pengawas','grup_lain',

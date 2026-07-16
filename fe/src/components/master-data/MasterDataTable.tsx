@@ -13,7 +13,6 @@ interface Props {
 
 const fieldLabels: Record<string, Record<string, string>> = {
   departemen: { nama: 'Nama Departemen' },
-  perusahaan: { nama: 'Nama Perusahaan', alamat: 'Alamat', telepon: 'Telepon' },
   personil: { nama: 'Nama', jabatan: 'Jabatan', telepon: 'Telepon' },
   peralatan: { nama: 'Nama', tipe: 'Tipe', spesifikasi: 'Spesifikasi' },
   bahaya: { nama: 'Nama', kategori: 'Kategori', deskripsi: 'Deskripsi' },
@@ -28,7 +27,6 @@ const fieldLabels: Record<string, Record<string, string>> = {
 
 const labelKeys: Record<string, string> = {
   departemen: 'nama',
-  perusahaan: 'nama',
   personil: 'nama',
   peralatan: 'nama',
   bahaya: 'nama',

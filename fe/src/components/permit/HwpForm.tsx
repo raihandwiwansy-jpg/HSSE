@@ -142,10 +142,7 @@ export default function HwpForm({ data, onChange }: HwpFormProps) {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Input label="Pemohon Izin Oleh" name="pemohon_izin_oleh" value={(data.pemohon_izin_oleh as string) || ''} onChange={(e) => update('pemohon_izin_oleh', e.target.value)} register={() => ({})} placeholder="Nama" />
-          <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300">Nama Perusahaan</label>
-            <MasterSelect masterType="perusahaan" value={(data.nama_perusahaan as string) || ''} onChange={(v) => update('nama_perusahaan', v)} placeholder="Pilih perusahaan..." />
-          </div>
+          <Input label="Nama Perusahaan" name="nama_perusahaan" value={(data.nama_perusahaan as string) || ''} onChange={(e) => update('nama_perusahaan', e.target.value)} register={() => ({})} placeholder="Nama Perusahaan" />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Input label="Penanggung Jawab / Responsible Persons (RP)" name="penanggung_jawab" value={(data.penanggung_jawab as string) || ''} onChange={(e) => update('penanggung_jawab', e.target.value)} register={() => ({})} />
