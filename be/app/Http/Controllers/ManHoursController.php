@@ -21,7 +21,23 @@ class ManHoursController extends Controller
         
         $records = MonthlyManHour::with('creator:id,name')
             ->where('tahun', $year)
-            ->orderByRaw("FIELD(bulan, 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember')")
+            ->orderByRaw("
+                CASE bulan
+                    WHEN 'Januari' THEN 1
+                    WHEN 'Februari' THEN 2
+                    WHEN 'Maret' THEN 3
+                    WHEN 'April' THEN 4
+                    WHEN 'Mei' THEN 5
+                    WHEN 'Juni' THEN 6
+                    WHEN 'Juli' THEN 7
+                    WHEN 'Agustus' THEN 8
+                    WHEN 'September' THEN 9
+                    WHEN 'Oktober' THEN 10
+                    WHEN 'November' THEN 11
+                    WHEN 'Desember' THEN 12
+                    ELSE 13
+                END
+            ")
             ->get();
             
         // Calculate totals for the year

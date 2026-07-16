@@ -161,7 +161,7 @@ class DashboardController extends Controller
         $user = $request->user();
 
         $query = Insiden::select(
-            DB::raw("DATE_FORMAT(tanggal_kejadian, '%Y-%m') as bulan"),
+            DB::raw(DB::connection()->getDriverName() === 'pgsql' ? "TO_CHAR(tanggal_kejadian, 'YYYY-MM') as bulan" : "DATE_FORMAT(tanggal_kejadian, '%Y-%m') as bulan"),
             DB::raw('count(*) as total')
         )
         ->where('tanggal_kejadian', '>=', now()->subMonths(12));
@@ -289,7 +289,7 @@ class DashboardController extends Controller
         $lastAccident = (clone $insidenQuery)->where('jenis', 'kecelakaan')->latest('tanggal_kejadian')->first();
 
         $insidenPerBulan = (clone $insidenQuery)
-            ->select(DB::raw("DATE_FORMAT(tanggal_kejadian, '%Y-%m') as bulan"), DB::raw('count(*) as total'))
+            ->select(DB::raw(DB::connection()->getDriverName() === 'pgsql' ? "TO_CHAR(tanggal_kejadian, 'YYYY-MM') as bulan" : "DATE_FORMAT(tanggal_kejadian, '%Y-%m') as bulan"), DB::raw('count(*) as total'))
             ->where('tanggal_kejadian', '>=', now()->subMonths(12))
             ->groupBy('bulan')->orderBy('bulan')->get();
 
@@ -424,7 +424,7 @@ class DashboardController extends Controller
         }
 
         $insidenPerBulan = Insiden::select(
-            DB::raw("DATE_FORMAT(tanggal_kejadian, '%Y-%m') as bulan"),
+            DB::raw(DB::connection()->getDriverName() === 'pgsql' ? "TO_CHAR(tanggal_kejadian, 'YYYY-MM') as bulan" : "DATE_FORMAT(tanggal_kejadian, '%Y-%m') as bulan"),
             DB::raw('count(*) as total')
         )
         ->where('tanggal_kejadian', '>=', now()->subMonths(6))
@@ -542,7 +542,7 @@ class DashboardController extends Controller
         foreach ($months as $m) {
             $parts = explode('-', $m);
             $monthLabel = $monthNames[$parts[1]];
-            $count = \App\Models\SafetyPatrol::where(DB::raw("DATE_FORMAT(tanggal, '%Y-%m')"), $m)->count();
+            $count = \App\Models\SafetyPatrol::where(DB::raw(DB::connection()->getDriverName() === 'pgsql' ? "TO_CHAR(tanggal, 'YYYY-MM')" : "DATE_FORMAT(tanggal, '%Y-%m')"), $m)->count();
             $safetyInspectionTrends[] = [
                 'month' => $monthLabel,
                 'inspeksi' => $count
@@ -553,8 +553,8 @@ class DashboardController extends Controller
         foreach ($months as $m) {
             $parts = explode('-', $m);
             $monthLabel = $monthNames[$parts[1]];
-            $sbCount = \App\Models\SafetyBehavior::where(DB::raw("DATE_FORMAT(tanggal, '%Y-%m')"), $m)->count();
-            $kpiCount = \App\Models\HseKpiPerformance::where(DB::raw("DATE_FORMAT(period_start, '%Y-%m')"), $m)->sum('hse_training');
+            $sbCount = \App\Models\SafetyBehavior::where(DB::raw(DB::connection()->getDriverName() === 'pgsql' ? "TO_CHAR(tanggal, 'YYYY-MM')" : "DATE_FORMAT(tanggal, '%Y-%m')"), $m)->count();
+            $kpiCount = \App\Models\HseKpiPerformance::where(DB::raw(DB::connection()->getDriverName() === 'pgsql' ? "TO_CHAR(period_start, 'YYYY-MM')" : "DATE_FORMAT(period_start, '%Y-%m')"), $m)->sum('hse_training');
             $trainingSafetyBehavior[] = [
                 'month' => $monthLabel,
                 'safety_behavior' => $sbCount,
