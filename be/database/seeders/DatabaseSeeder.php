@@ -10,11 +10,11 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             UserSeeder::class,
-            InsidenSeeder::class,
-            GwpPermitSeeder::class,
-            JsaSeeder::class,
-            ApdSeeder::class,
-            KaryawanSeeder::class,
+            // InsidenSeeder::class,
+            // GwpPermitSeeder::class,
+            // JsaSeeder::class,
+            // ApdSeeder::class,
+            // KaryawanSeeder::class,
         ]);
     }
 }

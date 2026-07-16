@@ -58,7 +58,5 @@ class UserSeeder extends Seeder
             ]
         );
 
-        User::factory(4)->admin()->create();
-        User::factory(14)->user()->create();
     }
 }
