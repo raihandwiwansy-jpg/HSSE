@@ -440,8 +440,17 @@ class ExportController extends Controller
 
         // Populate monthly records from database into the sheet
         foreach ($records as $record) {
-            $recYear = (int)$record->tahun;
+            $recYearStr = $record->tahun;
             $recMonth = $record->bulan;
+            
+            if ($recYearStr === '2018-2025') {
+                $recapTotal = ($record->normal_jam_inl + $record->normal_jam_kontraktor + $record->normal_jam_outsourcing 
+                             + $record->overtime_inl + $record->overtime_kontraktor + $record->overtime_outsourcing) - $record->cuti_sakit;
+                $sheet->setCellValue("P18", $recapTotal);
+                continue;
+            }
+            
+            $recYear = (int)$recYearStr;
             
             $monthIndex = array_search(strtolower($recMonth), array_map('strtolower', $months));
             if ($monthIndex === false) {

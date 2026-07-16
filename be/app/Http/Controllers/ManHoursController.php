@@ -66,7 +66,7 @@ class ManHoursController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'tahun' => 'required|string|max:4',
+            'tahun' => 'required|string|max:20',
             'bulan' => [
                 'required',
                 'string',
@@ -146,7 +146,7 @@ class ManHoursController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'tahun' => 'sometimes|required|string|max:4',
+            'tahun' => 'sometimes|required|string|max:20',
             'bulan' => [
                 'sometimes',
                 'required',

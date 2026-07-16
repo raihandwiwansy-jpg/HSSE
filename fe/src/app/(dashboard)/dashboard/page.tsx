@@ -91,7 +91,7 @@ export default function DashboardPage() {
     <div className="space-y-6 sm:space-y-8 animate-fade-in-up pb-10">
       
       {/* ==================== 1. BRANDING HEADER BANNER WITH ROTATING BACKGROUND ==================== */}
-      <div className="relative overflow-hidden rounded-3xl border border-blue-900/30 text-white shadow-2xl min-h-[340px] sm:min-h-[380px] flex flex-col justify-between transition-all duration-500 group">
+      <div className="relative overflow-hidden rounded-3xl border border-blue-900/30 dark:border-white/5 text-white shadow-2xl dark:shadow-[0_10px_40px_rgba(0,0,0,0.8)] min-h-[340px] sm:min-h-[380px] flex flex-col justify-between transition-all duration-500 group">
         
         {/* Slideshow background layer */}
         <div className="absolute inset-0 z-0 overflow-hidden">
