@@ -189,34 +189,34 @@ export default function InsidenListPage() {
                         {new Date(insiden.tanggal_kejadian).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
                       </span>
                     </td>
-                    <td className="px-3 py-2.5">
+                    <td className="px-3 py-2.5 whitespace-nowrap">
                       <StatusBadge status={insiden.status} />
                     </td>
-                    <td className="px-3 py-2.5" onClick={e => e.stopPropagation()}>
-                      <div className="flex items-center justify-center gap-1">
+                    <td className="px-3 py-2.5 whitespace-nowrap" onClick={e => e.stopPropagation()}>
+                      <div className="flex items-center justify-center gap-1 shrink-0">
                         <button
                           onClick={() => router.push(`/insiden/${insiden.id}`)}
-                          className="p-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-colors"
+                          className="p-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-colors shrink-0"
                           title="Detail"
                         >
-                          <Eye size={14} />
+                          <Eye size={14} className="shrink-0" />
                         </button>
                         {(user?.role === 'admin' || user?.role === 'supervisor' || (user?.role === 'user' && insiden.status === 'pending')) && (
                           <button
                             onClick={() => router.push(`/insiden/${insiden.id}/edit`)}
-                            className="p-1.5 text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-md transition-colors"
+                            className="p-1.5 text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-md transition-colors shrink-0"
                             title="Edit"
                           >
-                            <Edit size={14} />
+                            <Edit size={14} className="shrink-0" />
                           </button>
                         )}
                         {(user?.role === 'admin' || user?.role === 'user') && (
                           <button
                             onClick={() => setDeleteId(insiden.id)}
-                            className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
+                            className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors shrink-0"
                             title="Hapus"
                           >
-                            <Trash2 size={14} />
+                            <Trash2 size={14} className="shrink-0" />
                           </button>
                         )}
                       </div>

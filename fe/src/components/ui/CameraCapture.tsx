@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState, useCallback, useEffect } from 'react';
-import { Camera, Upload, X, Trash2, Image as ImageIcon, ZoomIn } from 'lucide-react';
+import { Camera, Upload, X, Trash2, Image as ImageIcon, ZoomIn, RefreshCw } from 'lucide-react';
 
 interface PhotoItem {
   file: File;
@@ -34,6 +34,7 @@ export default function CameraCapture({ photos, onChange, maxPhotos = 10 }: Came
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+  const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
 
   useEffect(() => {
     return () => {
@@ -43,24 +44,47 @@ export default function CameraCapture({ photos, onChange, maxPhotos = 10 }: Came
     };
   }, [stream]);
 
-  const startCamera = async () => {
+  const startCamera = async (mode: 'environment' | 'user' = facingMode) => {
     setCameraError(null);
     setIsCameraActive(true);
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+    }
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' },
+        video: { facingMode: mode },
         audio: false,
       });
       setStream(mediaStream);
+      setFacingMode(mode);
       setTimeout(() => {
         if (videoRef.current) {
           videoRef.current.srcObject = mediaStream;
         }
       }, 100);
     } catch (err: any) {
-      console.error('Camera access error:', err);
-      setCameraError('Gagal mengakses kamera. Pastikan izin kamera diberikan.');
+      console.warn(`Camera access with facingMode=${mode} failed, trying fallback:`, err);
+      try {
+        const fallbackStream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false,
+        });
+        setStream(fallbackStream);
+        setTimeout(() => {
+          if (videoRef.current) {
+            videoRef.current.srcObject = fallbackStream;
+          }
+        }, 100);
+      } catch (err2: any) {
+        console.error('Camera fallback error:', err2);
+        setCameraError('Gagal mengakses kamera. Pastikan izin kamera diberikan.');
+      }
     }
+  };
+
+  const toggleFacingMode = () => {
+    const nextMode = facingMode === 'environment' ? 'user' : 'environment';
+    startCamera(nextMode);
   };
 
   const stopCamera = () => {
@@ -79,8 +103,12 @@ export default function CameraCapture({ photos, onChange, maxPhotos = 10 }: Came
     canvas.height = video.videoHeight || 480;
     const ctx = canvas.getContext('2d');
     if (ctx) {
+      if (facingMode === 'user') {
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+      }
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const base64 = canvas.toDataURL('image/jpeg');
+      const base64 = canvas.toDataURL('image/jpeg', 0.85);
       const filename = `photo_${Date.now()}.jpg`;
       const file = base64ToFile(base64, filename);
       
@@ -122,31 +150,32 @@ export default function CameraCapture({ photos, onChange, maxPhotos = 10 }: Came
       {photos.length > 0 && (
         <div className="grid grid-cols-3 gap-2">
           {photos.map((p, idx) => (
-            <div key={idx} className="relative group aspect-square">
+            <div key={idx} className="relative group aspect-square rounded-xl overflow-hidden border border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-800">
               <img
                 src={p.preview}
                 alt={`Foto ${idx + 1}`}
-                className="w-full h-full object-cover rounded-xl border border-gray-200 dark:border-gray-600 cursor-zoom-in"
+                className="w-full h-full object-cover cursor-zoom-in transition-transform group-hover:scale-105"
                 onClick={() => setLightboxSrc(p.preview)}
               />
-              {/* Overlay actions */}
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center gap-1.5">
-                <button
-                  onClick={() => setLightboxSrc(p.preview)}
-                  className="p-1.5 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors"
-                  title="Lihat full"
-                >
-                  <ZoomIn size={14} />
-                </button>
-                <button
-                  onClick={() => removePhoto(idx)}
-                  className="p-1.5 bg-red-500/80 hover:bg-red-600 text-white rounded-lg transition-colors"
-                  title="Hapus"
-                >
-                  <Trash2 size={14} />
-                </button>
-              </div>
-              <span className="absolute bottom-1 left-1 text-[9px] bg-black/50 text-white px-1.5 py-0.5 rounded-md font-medium">
+              {/* Always visible delete button on top-right for mobile touch reliability */}
+              <button
+                type="button"
+                onClick={() => removePhoto(idx)}
+                className="absolute top-1 right-1 p-1.5 bg-red-600/90 hover:bg-red-700 text-white rounded-lg shadow-md transition-colors z-10 shrink-0"
+                title="Hapus foto"
+              >
+                <Trash2 size={13} className="shrink-0" />
+              </button>
+              {/* Zoom icon hint on hover / bottom right */}
+              <button
+                type="button"
+                onClick={() => setLightboxSrc(p.preview)}
+                className="absolute bottom-1 right-1 p-1.5 bg-black/60 hover:bg-black/80 text-white rounded-lg transition-opacity opacity-0 group-hover:opacity-100 hidden sm:flex shrink-0"
+                title="Lihat full"
+              >
+                <ZoomIn size={13} className="shrink-0" />
+              </button>
+              <span className="absolute bottom-1 left-1 text-[9px] bg-black/60 text-white px-1.5 py-0.5 rounded-md font-medium shrink-0">
                 {idx + 1}/{photos.length}
               </span>
             </div>
@@ -160,10 +189,10 @@ export default function CameraCapture({ photos, onChange, maxPhotos = 10 }: Came
           {/* Camera button */}
           <button
             type="button"
-            onClick={startCamera}
+            onClick={() => startCamera(facingMode)}
             className="flex-1 flex flex-col items-center justify-center gap-1.5 py-4 border-2 border-dashed border-blue-400 dark:border-blue-500 rounded-xl text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group"
           >
-            <Camera size={22} className="group-hover:scale-110 transition-transform" />
+            <Camera size={22} className="group-hover:scale-110 transition-transform shrink-0" />
             <span className="text-[11px] font-semibold">Kamera</span>
           </button>
 
@@ -173,7 +202,7 @@ export default function CameraCapture({ photos, onChange, maxPhotos = 10 }: Came
             onClick={() => galleryInputRef.current?.click()}
             className="flex-1 flex flex-col items-center justify-center gap-1.5 py-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-55 dark:hover:bg-gray-800 hover:border-gray-400 dark:hover:border-gray-550 transition-colors group"
           >
-            <ImageIcon size={22} className="group-hover:scale-110 transition-transform" />
+            <ImageIcon size={22} className="group-hover:scale-110 transition-transform shrink-0" />
             <span className="text-[11px] font-semibold">Galeri</span>
           </button>
 
@@ -202,38 +231,54 @@ export default function CameraCapture({ photos, onChange, maxPhotos = 10 }: Came
 
       {/* Active Camera Modal */}
       {isCameraActive && (
-        <div className="fixed inset-0 z-[99999] bg-black/95 flex flex-col items-center justify-center p-4">
-          <div className="relative rounded-2xl overflow-hidden bg-black aspect-video w-full max-w-md border border-gray-700 shadow-inner">
+        <div className="fixed inset-0 z-[99999] bg-black/95 flex flex-col items-center justify-center p-4 animate-fade-in">
+          <div className="relative rounded-2xl overflow-hidden bg-black aspect-video w-full max-w-md border border-gray-700 shadow-2xl flex flex-col justify-between">
             <video
               ref={videoRef}
               autoPlay
               playsInline
               muted
-              className="w-full h-full object-cover scale-x-[-1]"
+              className={`w-full h-full object-cover transition-transform ${facingMode === 'user' ? 'scale-x-[-1]' : 'scale-x-1'}`}
             />
             
+            {/* Top Bar inside Camera */}
+            <div className="absolute top-3 right-3 left-3 flex justify-between items-center">
+              <span className="text-[10px] bg-black/60 text-white px-2.5 py-1 rounded-full font-medium border border-white/10">
+                {facingMode === 'environment' ? '📷 Kamera Belakang' : '🤳 Kamera Depan'}
+              </span>
+              <button
+                type="button"
+                onClick={toggleFacingMode}
+                className="p-2 bg-black/60 hover:bg-black/80 text-white rounded-full transition-colors border border-white/10 flex items-center gap-1.5 text-xs font-medium px-3 shadow"
+                title="Balik Kamera (Depan/Belakang)"
+              >
+                <RefreshCw size={14} className="shrink-0" />
+                <span className="hidden sm:inline">Balik</span>
+              </button>
+            </div>
+
             {/* Overlay Shutter Controls */}
-            <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center gap-4">
+            <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center gap-6">
               <button
                 type="button"
                 onClick={capturePhoto}
                 className="w-14 h-14 bg-white hover:bg-gray-100 rounded-full border-4 border-gray-350 flex items-center justify-center shadow-lg transition-transform transform active:scale-95"
                 title="Ambil Foto"
               >
-                <div className="w-10 h-10 bg-red-600 hover:bg-red-750 rounded-full" />
+                <div className="w-10 h-10 bg-red-600 hover:bg-red-750 rounded-full shrink-0" />
               </button>
               <button
                 type="button"
                 onClick={stopCamera}
-                className="p-2.5 bg-gray-900/80 hover:bg-gray-800 text-white rounded-full transition-colors shadow"
+                className="p-2.5 bg-gray-900/80 hover:bg-gray-800 text-white rounded-full transition-colors shadow border border-white/10 shrink-0"
                 title="Tutup Kamera"
               >
-                <X size={20} />
+                <X size={20} className="shrink-0" />
               </button>
             </div>
           </div>
           {cameraError && (
-            <p className="text-xs text-red-500 text-center font-medium mt-4">
+            <p className="text-xs text-red-500 text-center font-medium mt-4 bg-red-950/40 px-4 py-2 rounded-xl border border-red-800/30">
               {cameraError}
             </p>
           )}
@@ -243,14 +288,14 @@ export default function CameraCapture({ photos, onChange, maxPhotos = 10 }: Came
       {/* Lightbox */}
       {lightboxSrc && (
         <div
-          className="fixed inset-0 z-[99999] bg-black/90 flex items-center justify-center p-4"
+          className="fixed inset-0 z-[99999] bg-black/90 flex items-center justify-center p-4 animate-fade-in"
           onClick={() => setLightboxSrc(null)}
         >
           <button
-            className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors"
+            className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors shrink-0"
             onClick={() => setLightboxSrc(null)}
           >
-            <X size={22} />
+            <X size={22} className="shrink-0" />
           </button>
           <img
             src={lightboxSrc}

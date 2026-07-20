@@ -226,10 +226,10 @@ export default function ManHoursListPage() {
                       <td className="px-1 py-1.5 border-r border-gray-300 dark:border-gray-600 font-black text-emerald-700 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-900/20">{Number(r.jam_kerja_aman).toLocaleString('id-ID')}</td>
                       
                       {canEdit && (
-                        <td className="px-1 py-1.5 text-center">
-                          <div className="flex items-center justify-center gap-1">
-                            <button onClick={() => router.push(`/man-hours/${r.id}/edit`)} className="text-amber-500 hover:text-amber-600"><Edit size={12}/></button>
-                            <button onClick={() => setDeleteId(r.id)} className="text-red-500 hover:text-red-600"><Trash2 size={12}/></button>
+                        <td className="px-1 py-1.5 text-center whitespace-nowrap">
+                          <div className="flex items-center justify-center gap-1 shrink-0">
+                            <button onClick={() => router.push(`/man-hours/${r.id}/edit`)} className="text-amber-500 hover:text-amber-600 p-1 shrink-0"><Edit size={12} className="shrink-0"/></button>
+                            <button onClick={() => setDeleteId(r.id)} className="text-red-500 hover:text-red-600 p-1 shrink-0"><Trash2 size={12} className="shrink-0"/></button>
                           </div>
                         </td>
                       )}
@@ -271,9 +271,9 @@ export default function ManHoursListPage() {
               <div className="flex justify-between items-center mb-3 pb-3 border-b border-gray-100 dark:border-gray-800">
                 <h3 className="font-bold text-lg text-indigo-700 dark:text-indigo-400">{r.bulan} {r.tahun}</h3>
                 {canEdit && (
-                  <div className="flex gap-2">
-                    <button onClick={() => router.push(`/man-hours/${r.id}/edit`)} className="p-1.5 text-amber-500 bg-amber-50 dark:bg-amber-900/20 rounded-md"><Edit size={14}/></button>
-                    <button onClick={() => setDeleteId(r.id)} className="p-1.5 text-red-500 bg-red-50 dark:bg-red-900/20 rounded-md"><Trash2 size={14}/></button>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button onClick={() => router.push(`/man-hours/${r.id}/edit`)} className="p-1.5 text-amber-500 bg-amber-50 dark:bg-amber-900/20 rounded-md shrink-0"><Edit size={14} className="shrink-0"/></button>
+                    <button onClick={() => setDeleteId(r.id)} className="p-1.5 text-red-500 bg-red-50 dark:bg-red-900/20 rounded-md shrink-0"><Trash2 size={14} className="shrink-0"/></button>
                   </div>
                 )}
               </div>

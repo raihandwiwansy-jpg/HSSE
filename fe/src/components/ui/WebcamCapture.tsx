@@ -18,6 +18,7 @@ export default function WebcamCapture({ onCapture, initialPreview = null }: Webc
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [preview, setPreview] = useState<string | null>(initialPreview);
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
 
   useEffect(() => {
     if (initialPreview) {
@@ -32,24 +33,45 @@ export default function WebcamCapture({ onCapture, initialPreview = null }: Webc
     };
   }, [stream]);
 
-  const startCamera = async () => {
+  const startCamera = async (mode: 'environment' | 'user' = facingMode) => {
     setCameraError(null);
     setIsCameraActive(true);
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+    }
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' },
+        video: { facingMode: mode },
         audio: false,
       });
       setStream(mediaStream);
+      setFacingMode(mode);
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
       }
     } catch (err: any) {
-      console.error('Camera access error:', err);
-      setCameraError('Gagal mengakses kamera. Pastikan izin kamera diberikan.');
-      setIsCameraActive(false);
-      toast.error('Tidak dapat mengakses kamera');
+      console.warn(`Camera access with facingMode=${mode} failed, trying fallback:`, err);
+      try {
+        const fallbackStream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false,
+        });
+        setStream(fallbackStream);
+        if (videoRef.current) {
+          videoRef.current.srcObject = fallbackStream;
+        }
+      } catch (err2: any) {
+        console.error('Camera fallback error:', err2);
+        setCameraError('Gagal mengakses kamera. Pastikan izin kamera diberikan.');
+        setIsCameraActive(false);
+        toast.error('Tidak dapat mengakses kamera');
+      }
     }
+  };
+
+  const toggleFacingMode = () => {
+    const nextMode = facingMode === 'environment' ? 'user' : 'environment';
+    startCamera(nextMode);
   };
 
   const stopCamera = () => {
@@ -68,8 +90,12 @@ export default function WebcamCapture({ onCapture, initialPreview = null }: Webc
     canvas.height = video.videoHeight || 480;
     const ctx = canvas.getContext('2d');
     if (ctx) {
+      if (facingMode === 'user') {
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+      }
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const base64 = canvas.toDataURL('image/jpeg');
+      const base64 = canvas.toDataURL('image/jpeg', 0.85);
       setPreview(base64);
       onCapture(base64, base64);
       stopCamera();
@@ -103,32 +129,48 @@ export default function WebcamCapture({ onCapture, initialPreview = null }: Webc
     <div className="space-y-4">
       {/* Active Camera View */}
       {isCameraActive && (
-        <div className="relative rounded-2xl overflow-hidden bg-black aspect-video w-full max-w-md mx-auto border border-gray-700 shadow-inner">
+        <div className="relative rounded-2xl overflow-hidden bg-black aspect-video w-full max-w-md mx-auto border border-gray-700 shadow-2xl flex flex-col justify-between">
           <video
             ref={videoRef}
             autoPlay
             playsInline
             muted
-            className="w-full h-full object-cover scale-x-[-1]"
+            className={`w-full h-full object-cover transition-transform ${facingMode === 'user' ? 'scale-x-[-1]' : 'scale-x-1'}`}
           />
           
+          {/* Top Bar inside Camera */}
+          <div className="absolute top-3 right-3 left-3 flex justify-between items-center z-10">
+            <span className="text-[10px] bg-black/60 text-white px-2.5 py-1 rounded-full font-medium border border-white/10">
+              {facingMode === 'environment' ? '📷 Kamera Belakang' : '🤳 Kamera Depan'}
+            </span>
+            <button
+              type="button"
+              onClick={toggleFacingMode}
+              className="p-2 bg-black/60 hover:bg-black/80 text-white rounded-full transition-colors border border-white/10 flex items-center gap-1.5 text-xs font-medium px-3 shadow"
+              title="Balik Kamera (Depan/Belakang)"
+            >
+              <RefreshCw size={14} className="shrink-0" />
+              <span className="hidden sm:inline">Balik</span>
+            </button>
+          </div>
+
           {/* Overlay Shutter Controls */}
-          <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center gap-4">
+          <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center gap-6 z-10">
             <button
               type="button"
               onClick={capturePhoto}
               className="w-14 h-14 bg-white hover:bg-gray-100 rounded-full border-4 border-gray-300 flex items-center justify-center shadow-lg transition-transform transform active:scale-95"
               title="Ambil Foto"
             >
-              <div className="w-10 h-10 bg-red-650 hover:bg-red-750 rounded-full" />
+              <div className="w-10 h-10 bg-red-650 hover:bg-red-750 rounded-full shrink-0" />
             </button>
             <button
               type="button"
               onClick={stopCamera}
-              className="p-2.5 bg-gray-900/80 hover:bg-gray-800 text-white rounded-full transition-colors shadow"
+              className="p-2.5 bg-gray-900/80 hover:bg-gray-800 text-white rounded-full transition-colors shadow border border-white/10 shrink-0"
               title="Tutup Kamera"
             >
-              <X size={20} />
+              <X size={20} className="shrink-0" />
             </button>
           </div>
         </div>

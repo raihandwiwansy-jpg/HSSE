@@ -149,18 +149,18 @@ export default function PermitListPage() {
                       </td>
                       <td className="px-2.5 py-1.5"><p className="text-xs font-medium text-gray-800 dark:text-white truncate max-w-[140px] sm:max-w-[220px]">{p.judul}</p></td>
                       <td className="px-2.5 py-1.5 hidden md:table-cell"><p className="text-xs text-gray-500 truncate max-w-[140px]">{p.lokasi}</p></td>
-                      <td className="px-2.5 py-1.5"><StatusBadge status={p.status}/></td>
+                      <td className="px-2.5 py-1.5 whitespace-nowrap"><StatusBadge status={p.status}/></td>
                       <td className="px-2.5 py-1.5 text-xs text-gray-500 hidden lg:table-cell">
                         {new Date(p.tanggal).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'})}
                       </td>
-                      <td className="px-2.5 py-1.5" onClick={e=>e.stopPropagation()}>
-                        <div className="flex items-center justify-center gap-1">
-                          <button onClick={()=>router.push(`/permit/${p.id}`)} className="p-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-colors" title="Detail"><Eye size={14}/></button>
+                      <td className="px-2.5 py-1.5 whitespace-nowrap" onClick={e=>e.stopPropagation()}>
+                        <div className="flex items-center justify-center gap-1 shrink-0">
+                          <button onClick={()=>router.push(`/permit/${p.id}`)} className="p-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-colors shrink-0" title="Detail"><Eye size={14} className="shrink-0" /></button>
                           {(user?.role === 'admin' || (user?.role === 'user' && (p.status==='draft'||p.status==='supervisor_rejected'||p.status==='hse_rejected'))) && (
-                            <button onClick={()=>router.push(`/permit/${p.id}/edit`)} className="p-1.5 text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-md transition-colors" title="Edit"><Edit size={14}/></button>
+                            <button onClick={()=>router.push(`/permit/${p.id}/edit`)} className="p-1.5 text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-md transition-colors shrink-0" title="Edit"><Edit size={14} className="shrink-0" /></button>
                           )}
                           {(user?.role === 'admin' || (user?.role !== 'admin' && (p.status==='draft'||p.status==='completed')))&&(
-                            <button onClick={()=>setDeleteId(p.id)} className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors" title="Hapus"><Trash2 size={14}/></button>
+                            <button onClick={()=>setDeleteId(p.id)} className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors shrink-0" title="Hapus"><Trash2 size={14} className="shrink-0" /></button>
                           )}
                         </div>
                       </td>
@@ -218,14 +218,14 @@ export default function PermitListPage() {
                 <h3 className="text-sm font-semibold text-gray-800 dark:text-white mb-1 truncate">{p.judul}</h3>
                 <p className="text-xs text-gray-500 mb-3 truncate">{p.lokasi}</p>
                 <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700">
-                  <p className="text-[10px] text-gray-400">{new Date(p.tanggal).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'})}</p>
-                  <div className="flex gap-1" onClick={e=>e.stopPropagation()}>
-                    <button onClick={()=>router.push(`/permit/${p.id}`)} className="p-1 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded"><Eye size={12}/></button>
+                  <p className="text-[10px] text-gray-400 shrink-0">{new Date(p.tanggal).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'})}</p>
+                  <div className="flex items-center gap-1 shrink-0" onClick={e=>e.stopPropagation()}>
+                    <button onClick={()=>router.push(`/permit/${p.id}`)} className="p-1 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded shrink-0"><Eye size={12} className="shrink-0"/></button>
                     {(user?.role === 'admin' || (user?.role === 'user' && (p.status==='draft'||p.status==='supervisor_rejected'||p.status==='hse_rejected'))) && (
-                      <button onClick={()=>router.push(`/permit/${p.id}/edit`)} className="p-1 text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded"><Edit size={12}/></button>
+                      <button onClick={()=>router.push(`/permit/${p.id}/edit`)} className="p-1 text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded shrink-0"><Edit size={12} className="shrink-0"/></button>
                     )}
                     {(user?.role === 'admin' || (user?.role !== 'admin' && (p.status==='draft'||p.status==='completed')))&&(
-                      <button onClick={()=>setDeleteId(p.id)} className="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"><Trash2 size={12}/></button>
+                      <button onClick={()=>setDeleteId(p.id)} className="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded shrink-0"><Trash2 size={12} className="shrink-0"/></button>
                     )}
                   </div>
                 </div>

@@ -65,17 +65,17 @@ export default function Navbar() {
   return (
     <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/60 dark:border-gray-700/60 h-14 flex items-center justify-between px-3 sm:px-6 gap-2 transition-colors duration-300 sticky top-0 z-30">
       {/* Left */}
-      <div className="flex items-center gap-2 min-w-0">
+      <div className="flex items-center gap-2 min-w-0 flex-1 sm:flex-initial">
         {/* Hamburger mobile menu button */}
         <button
           onClick={() => setIsMobileOpen(!isMobileOpen)}
           className="lg:hidden p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg text-gray-600 dark:text-gray-300 transition-colors shrink-0"
           aria-label="Toggle Menu"
         >
-          <Menu size={20} />
+          <Menu size={20} className="shrink-0" />
         </button>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 min-w-0">
           <Shield size={16} className="text-blue-500 shrink-0" />
           <h1 className="text-sm sm:text-base font-bold text-gray-800 dark:text-white leading-none truncate">
             HSSE Management
@@ -87,7 +87,7 @@ export default function Navbar() {
       </div>
 
       {/* Center — Clock (visible on sm+) */}
-      <div className="flex-1 flex justify-center">
+      <div className="flex justify-center shrink-0 sm:flex-1">
         <div className="hidden sm:flex flex-col items-center text-center">
           <p className="text-xs font-semibold text-gray-700 dark:text-gray-200 leading-tight whitespace-nowrap">
             {dayName}, {date} {month} {year}
@@ -97,31 +97,31 @@ export default function Navbar() {
           </p>
         </div>
         {/* Mobile: only time */}
-        <div className="flex sm:hidden items-center gap-1 text-[10px] font-mono text-gray-500 dark:text-gray-400">
-          <Clock size={11} />
+        <div className="flex sm:hidden items-center gap-1 text-[10px] font-mono text-gray-500 dark:text-gray-400 shrink-0 whitespace-nowrap bg-gray-50 dark:bg-gray-800/50 px-2 py-1 rounded-lg border border-gray-100 dark:border-gray-700">
+          <Clock size={11} className="shrink-0 text-blue-500" />
           <span>{hours}:{minutes}</span>
         </div>
       </div>
 
       {/* Right */}
-      <div className="flex items-center gap-2 shrink-0">
+      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
         {!pathname.startsWith('/dashboard') && !pathname.startsWith('/settings') && !pathname.startsWith('/profil') && (
           <button
             onClick={() => setGuideOpen(true)}
             title="Buku Panduan"
-            className="relative p-2 text-amber-600 dark:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-xl transition-all hover:scale-105 active:scale-95 group overflow-hidden"
+            className="relative p-2 text-amber-600 dark:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-xl transition-all hover:scale-105 active:scale-95 group overflow-hidden shrink-0"
           >
             <span className="absolute inset-0 bg-amber-400/20 scale-0 rounded-xl group-active:scale-100 transition-transform duration-300 ease-out" />
-            <BookOpen size={20} className="relative z-10 group-hover:rotate-[-5deg] transition-transform duration-300" />
+            <BookOpen size={20} className="relative z-10 group-hover:rotate-[-5deg] transition-transform duration-300 shrink-0" />
           </button>
         )}
         <ThemeToggle />
 
         {/* Profile Dropdown */}
-        <div className="relative" ref={dropdownRef}>
+        <div className="relative shrink-0" ref={dropdownRef}>
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="flex items-center gap-1 sm:gap-2 px-1.5 sm:px-3 py-1.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors shrink-0"
           >
             <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center shadow-sm overflow-hidden border border-gray-300 dark:border-gray-600 shrink-0">
               {displayPhoto ? (
@@ -137,7 +137,7 @@ export default function Navbar() {
                 {user?.name || 'User'}
               </p>
             </div>
-            <ChevronDown className={`h-3.5 w-3.5 text-gray-400 dark:text-gray-500 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`h-3.5 w-3.5 text-gray-400 dark:text-gray-500 transition-transform duration-200 shrink-0 ${dropdownOpen ? 'rotate-180' : ''}`} />
           </button>
 
           {dropdownOpen && (
