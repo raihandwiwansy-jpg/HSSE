@@ -38,6 +38,7 @@ return new class extends Migration
             $table->timestamp('supervisor_rejected_at')->nullable();
             $table->timestamp('hse_approved_at')->nullable();
             $table->timestamp('hse_rejected_at')->nullable();
+            $table->timestamp('work_ready_at')->nullable();
             $table->timestamp('completed_at')->nullable();
             $table->timestamps();
         });
