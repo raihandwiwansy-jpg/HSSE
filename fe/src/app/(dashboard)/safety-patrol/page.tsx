@@ -122,15 +122,15 @@ export default function SafetyPatrolListPage() {
                     <td className="px-2.5 py-1.5"><p className="text-xs font-medium text-gray-800 dark:text-white truncate max-w-[180px]">{p.lokasi}</p></td>
                     <td className="px-2.5 py-1.5 hidden sm:table-cell"><p className="text-xs text-gray-600 dark:text-gray-400">{p.observer || '-'}</p></td>
                     <td className="px-2.5 py-1.5 hidden md:table-cell"><p className="text-xs text-gray-600 dark:text-gray-400">{p.auditee || '-'}</p></td>
-                    <td className="px-2.5 py-1.5"><StatusBadge status={p.status} /></td>
-                    <td className="px-2.5 py-1.5" onClick={e => e.stopPropagation()}>
-                      <div className="flex items-center justify-center gap-1">
-                        <button onClick={() => router.push(`/safety-patrol/${p.id}`)} className="p-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-colors" title="Detail"><Eye size={14} /></button>
+                    <td className="px-2.5 py-1.5 whitespace-nowrap"><StatusBadge status={p.status} /></td>
+                    <td className="px-2.5 py-1.5 whitespace-nowrap" onClick={e => e.stopPropagation()}>
+                      <div className="flex items-center justify-center gap-1 shrink-0">
+                        <button onClick={() => router.push(`/safety-patrol/${p.id}`)} className="p-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-colors shrink-0" title="Detail"><Eye size={14} className="shrink-0" /></button>
                         {(user?.role === 'admin' || (user?.role === 'user' && p.status === 'menunggu')) && (
-                          <button onClick={() => router.push(`/safety-patrol/${p.id}/edit`)} className="p-1.5 text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-md transition-colors" title="Edit"><Edit size={14} /></button>
+                          <button onClick={() => router.push(`/safety-patrol/${p.id}/edit`)} className="p-1.5 text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-md transition-colors shrink-0" title="Edit"><Edit size={14} className="shrink-0" /></button>
                         )}
                         {(user?.role === 'admin' || (user?.role === 'user' && p.status === 'menunggu')) && (
-                          <button onClick={() => setDeleteId(p.id)} className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors" title="Hapus"><Trash2 size={14} /></button>
+                          <button onClick={() => setDeleteId(p.id)} className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors shrink-0" title="Hapus"><Trash2 size={14} className="shrink-0" /></button>
                         )}
                       </div>
                     </td>

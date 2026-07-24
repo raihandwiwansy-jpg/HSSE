@@ -55,40 +55,40 @@ export default function CseTable({ data, page, isOwner, isAdmin, onEdit, onsubmi
                 <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{item.supervisor}</td>
                 <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{item.jumlah_pekerja}</td>
                 <td className="px-4 py-3"><StatusBadge status={item.status} /></td>
-                <td className="px-4 py-3">
-                  <div className="flex items-center justify-end gap-1">
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <div className="flex items-center justify-end gap-1 shrink-0">
                     <button
                       onClick={() => router.push(`/cse/${item.id}`)}
-                      className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg dark:hover:bg-blue-900/20 transition-colors"
+                      className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg dark:hover:bg-blue-900/20 transition-colors shrink-0"
                       title="Detail"
                     >
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-4 w-4 shrink-0" />
                     </button>
                     {isOwner(item) && item.status === 'draft' && onEdit && (
                       <button
                         onClick={() => onEdit(item.id)}
-                        className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-lg dark:hover:bg-gray-700 transition-colors"
+                        className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-lg dark:hover:bg-gray-700 transition-colors shrink-0"
                         title="Edit"
                       >
-                        <Edit3 className="h-4 w-4" />
+                        <Edit3 className="h-4 w-4 shrink-0" />
                       </button>
                     )}
                     {isOwner(item) && item.status === 'draft' && onsubmit && (
                       <button
                         onClick={() => onsubmit(item.id)}
-                        className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg dark:hover:bg-green-900/20 transition-colors"
+                        className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg dark:hover:bg-green-900/20 transition-colors shrink-0"
                         title="Submit"
                       >
-                        <Send className="h-4 w-4" />
+                        <Send className="h-4 w-4 shrink-0" />
                       </button>
                     )}
                     {isAdmin && onDelete && (
                       <button
                         onClick={() => onDelete(item.id)}
-                        className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg dark:hover:bg-red-900/20 transition-colors"
+                        className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg dark:hover:bg-red-900/20 transition-colors shrink-0"
                         title="Hapus"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4 shrink-0" />
                       </button>
                     )}
                   </div>

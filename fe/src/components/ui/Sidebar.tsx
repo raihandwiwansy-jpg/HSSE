@@ -94,103 +94,80 @@ export default function Sidebar({ children }: { children?: React.ReactNode }) {
     (s) => !s.roles || s.roles.includes(user?.role as string)
   );
 
-  const displayPhoto = user?.photo_url || user?.avatar || user?.foto;
-
   return (
     <SidebarContext.Provider value={{ isCollapsed, isMobileOpen, toggleSidebar, setIsMobileOpen }}>
       {isMobileOpen && (
-        <div className="lg:hidden fixed inset-0 bg-black/50 z-40" onClick={() => setIsMobileOpen(false)} />
+        <div className="lg:hidden fixed inset-0 bg-black/50 z-40 backdrop-blur-[1px]" onClick={() => setIsMobileOpen(false)} />
       )}
 
       {/* Sidebar */}
       <aside
         className={`
           fixed top-0 left-0 z-40 h-full
-          bg-white dark:bg-gray-900
-          border-r border-gray-200 dark:border-gray-700
+          bg-white dark:bg-[#12121E]
+          border-r border-gray-200 dark:border-gray-800
           transition-all duration-300 ease-in-out
           ${isCollapsed ? 'w-20' : 'w-64'}
           ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:translate-x-0
-          flex flex-col
+          flex flex-col select-none
         `}
       >
         {/* Collapse Toggle */}
         <button
           onClick={toggleSidebar}
-          className="hidden lg:flex absolute -right-3 top-5 w-6 h-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-full items-center justify-center shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 z-50"
+          className="hidden lg:flex absolute -right-3 top-5 w-6 h-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full items-center justify-center shadow-sm hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors z-50"
+          title={isCollapsed ? 'Perluas Sidebar' : 'Perkecil Sidebar'}
         >
-          <ChevronLeft size={14} className={`text-gray-500 transition-transform duration-300 ${isCollapsed ? 'rotate-180' : ''}`} />
+          <ChevronLeft size={14} className={`text-gray-500 dark:text-gray-400 transition-transform duration-300 ${isCollapsed ? 'rotate-180' : ''}`} />
         </button>
 
-
         {/* Brand Header */}
-        <div className={`h-16 flex items-center px-5 border-b border-gray-150 dark:border-gray-800 ${isCollapsed ? 'justify-center px-0' : 'gap-3 bg-gradient-to-r from-blue-50/20 to-transparent'}`}>
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-650 flex items-center justify-center p-1.5 shadow-md shadow-blue-500/10 shrink-0">
-            <img src="/Picture1.png" alt="INL Logo" className="w-full h-full object-contain filter invert-0 dark:brightness-110" />
-          </div>
-          {!isCollapsed && (
-            <div className="min-w-0">
-              <h2 className="text-xs font-black tracking-wider text-gray-800 dark:text-white leading-none">PT. INL</h2>
-              <p className="text-[9px] font-bold text-blue-600 dark:text-blue-400 tracking-widest mt-1 uppercase">HSSE SYSTEM</p>
+        <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-800/80 shrink-0">
+          <div className={`flex items-center gap-3 min-w-0 ${isCollapsed ? 'mx-auto' : ''}`}>
+            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center p-1.5 shrink-0 shadow-sm">
+              <img src="/Picture1.png" alt="INL Logo" className="w-full h-full object-contain filter invert-0 dark:brightness-110" />
             </div>
+            {!isCollapsed && (
+              <div className="min-w-0">
+                <h2 className="text-xs font-bold tracking-wide text-gray-900 dark:text-white leading-tight truncate">PT. INL</h2>
+                <p className="text-[10px] font-semibold text-blue-600 dark:text-blue-400 tracking-wider uppercase mt-0.5">HSSE SYSTEM</p>
+              </div>
+            )}
+          </div>
+          {/* Mobile Close Button */}
+          {!isCollapsed && (
+            <button
+              onClick={() => setIsMobileOpen(false)}
+              className="lg:hidden p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors shrink-0"
+              title="Tutup menu"
+            >
+              <X size={18} />
+            </button>
           )}
         </div>
 
-        {/* User Info */}
-        {!isCollapsed && (
-          <div className="px-4 py-3.5 border-b border-gray-150 dark:border-gray-800 bg-gradient-to-r from-blue-50/80 via-blue-50/40 to-transparent dark:from-blue-950/15 dark:via-blue-950/5">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-650 flex items-center justify-center shrink-0 overflow-hidden border-2 border-white dark:border-gray-800 shadow-sm">
-                  {displayPhoto ? (
-                    <img src={displayPhoto} alt={user?.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-sm font-extrabold text-white">{user?.name?.charAt(0)?.toUpperCase() || 'U'}</span>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold text-gray-800 dark:text-white truncate">
-                    {user?.name || 'User'}
-                  </p>
-                  <p className="text-[10px] text-blue-650 dark:text-blue-400 font-extrabold capitalize truncate mt-0.5">
-                    {user?.role || 'User'}{user?.departemen ? ` · ${user.departemen}` : ''}
-                  </p>
-                </div>
-              </div>
-              {/* Mobile Close Button */}
-              <button
-                onClick={() => setIsMobileOpen(false)}
-                className="lg:hidden p-1.5 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-xl text-gray-500 dark:text-gray-400 shrink-0"
-              >
-                <X size={18} />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Menu */}
-        <nav className="flex-1 overflow-y-auto p-3 space-y-1.5 custom-scrollbar">
+        {/* Menu Navigation */}
+        <nav className="flex-1 overflow-y-auto p-3 space-y-1 custom-scrollbar">
           {filteredMain.map((menu) => (
             <Link
               key={menu.href}
               href={menu.href}
               onClick={() => setIsMobileOpen(false)}
               className={`
-                relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold
-                transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group
-                ${isCollapsed ? 'justify-center' : ''}
+                flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors duration-150 group
+                ${isCollapsed ? 'justify-center px-2' : ''}
                 ${isActive(menu.href)
-                  ? 'bg-gradient-to-r from-blue-50 to-indigo-50/50 dark:from-blue-950/30 dark:to-indigo-950/15 text-blue-600 dark:text-blue-400 shadow-sm border-l-4 border-blue-500' + (isCollapsed ? ' pl-3' : ' pl-2')
-                  : 'text-gray-650 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-850 hover:text-gray-900 dark:hover:text-white'
+                  ? 'bg-blue-50 dark:bg-blue-900/25 text-blue-600 dark:text-blue-400 font-semibold'
+                  : 'text-gray-600 dark:text-gray-400 font-medium hover:bg-gray-100/80 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-gray-200'
                 }
               `}
               title={isCollapsed ? menu.label : ''}
             >
-              <span className="shrink-0 transition-transform duration-300 group-hover:scale-110">
+              <span className={`shrink-0 transition-colors ${isActive(menu.href) ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'}`}>
                 {menu.icon}
               </span>
-              {!isCollapsed && <span>{menu.label}</span>}
+              {!isCollapsed && <span className="truncate">{menu.label}</span>}
             </Link>
           ))}
 
@@ -199,50 +176,50 @@ export default function Sidebar({ children }: { children?: React.ReactNode }) {
             <button
               onClick={() => { if (!isCollapsed) setIsSettingsOpen(!isSettingsOpen); }}
               className={`
-                relative w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold
-                transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]
-                ${isCollapsed ? 'justify-center' : ''}
+                w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors duration-150
+                ${isCollapsed ? 'justify-center px-2' : ''}
                 ${isSettingsActive()
-                  ? 'bg-gradient-to-r from-blue-50 to-indigo-50/50 dark:from-blue-950/30 dark:to-indigo-950/15 text-blue-600 dark:text-blue-400 shadow-sm border-l-4 border-blue-500' + (isCollapsed ? ' pl-3' : ' pl-2')
-                  : 'text-gray-650 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-850 hover:text-gray-900 dark:hover:text-white'
+                  ? 'bg-blue-50 dark:bg-blue-900/25 text-blue-600 dark:text-blue-400 font-semibold'
+                  : 'text-gray-600 dark:text-gray-400 font-medium hover:bg-gray-100/80 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-gray-200'
                 }
               `}
               title={isCollapsed ? 'Settings' : ''}
             >
-              <Settings size={20} className="shrink-0" />
+              <span className={`shrink-0 transition-colors ${isSettingsActive() ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                <Settings size={20} />
+              </span>
               {!isCollapsed && (
                 <>
-                  <span className="flex-1 text-left">Settings</span>
-                  <ChevronDown size={16} className={`transition-transform duration-300 ${isSettingsOpen ? 'rotate-180' : ''}`} />
+                  <span className="flex-1 text-left truncate">Settings</span>
+                  <ChevronDown size={16} className={`text-gray-400 transition-transform duration-200 ${isSettingsOpen ? 'rotate-180' : ''}`} />
                 </>
               )}
             </button>
 
-            {/* Submenu with slide */}
+            {/* Submenu */}
             {!isCollapsed && (
               <div
                 className={`
-                  overflow-hidden transition-all duration-350 ease-in-out
-                  ${isSettingsOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}
+                  overflow-hidden transition-all duration-200 ease-in-out
+                  ${isSettingsOpen ? 'max-h-96 opacity-100 mt-1' : 'max-h-0 opacity-0'}
                 `}
               >
-                <div className="ml-5 border-l-2 border-gray-150 dark:border-gray-800 pl-3.5 space-y-1.5 mt-1.5">
+                <div className="ml-5 border-l border-gray-200 dark:border-gray-800 pl-3 space-y-1 py-1">
                   {filteredSettings.map((sub) => (
                     <Link
                       key={sub.href}
                       href={sub.href}
                       onClick={() => setIsMobileOpen(false)}
                       className={`
-                        flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold
-                        transition-all duration-200 hover:translate-x-0.5
+                        flex items-center gap-2.5 px-2.5 py-2 rounded-md text-xs transition-colors duration-150
                         ${pathname === sub.href
-                          ? 'bg-blue-50/75 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 font-bold'
-                          : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-850 hover:text-gray-700 dark:hover:text-gray-200'
+                          ? 'bg-blue-50/80 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-semibold'
+                          : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100/60 dark:hover:bg-gray-800/40 hover:text-gray-800 dark:hover:text-gray-200 font-medium'
                         }
                       `}
                     >
                       <span className="shrink-0">{sub.icon}</span>
-                      <span>{sub.label}</span>
+                      <span className="truncate">{sub.label}</span>
                     </Link>
                   ))}
                 </div>
@@ -255,35 +232,38 @@ export default function Sidebar({ children }: { children?: React.ReactNode }) {
             href="/profil"
             onClick={() => setIsMobileOpen(false)}
             className={`
-              relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold
-              transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]
-              ${isCollapsed ? 'justify-center' : ''}
+              flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors duration-150 group
+              ${isCollapsed ? 'justify-center px-2' : ''}
               ${pathname === '/profil'
-                ? 'bg-gradient-to-r from-blue-50 to-indigo-50/50 dark:from-blue-950/30 dark:to-indigo-950/15 text-blue-600 dark:text-blue-400 shadow-sm border-l-4 border-blue-500' + (isCollapsed ? ' pl-3' : ' pl-2')
-                : 'text-gray-650 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-850 hover:text-gray-900 dark:hover:text-white'
+                ? 'bg-blue-50 dark:bg-blue-900/25 text-blue-600 dark:text-blue-400 font-semibold'
+                : 'text-gray-600 dark:text-gray-400 font-medium hover:bg-gray-100/80 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-gray-200'
               }
             `}
             title={isCollapsed ? 'Profil' : ''}
           >
-            <User size={20} className="shrink-0" />
-            {!isCollapsed && <span>Profil</span>}
+            <span className={`shrink-0 transition-colors ${pathname === '/profil' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'}`}>
+              <User size={20} />
+            </span>
+            {!isCollapsed && <span className="truncate">Profil</span>}
           </Link>
         </nav>
 
-        {/* Bottom */}
-        <div className="border-t border-gray-150 dark:border-gray-800 p-3 bg-gradient-to-t from-gray-50/50 dark:from-gray-950/5 to-transparent">
+        {/* Bottom Logout Section */}
+        <div className="border-t border-gray-200 dark:border-gray-800/80 p-3 shrink-0">
           <button
             onClick={logout}
             className={`
-              w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold
-              text-red-650 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20
-              transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]
-              ${isCollapsed ? 'justify-center' : ''}
+              w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium
+              text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30
+              transition-colors duration-150 group
+              ${isCollapsed ? 'justify-center px-2' : ''}
             `}
             title={isCollapsed ? 'Logout' : ''}
           >
-            <LogOut size={20} className="shrink-0" />
-            {!isCollapsed && <span>Logout</span>}
+            <span className="shrink-0 text-red-500 dark:text-red-400 group-hover:text-red-600 dark:group-hover:text-red-300">
+              <LogOut size={20} />
+            </span>
+            {!isCollapsed && <span className="truncate">Logout</span>}
           </button>
         </div>
       </aside>

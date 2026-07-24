@@ -122,13 +122,13 @@ export default function StatusBadge({ status, size = 'sm', showIcon = true }: St
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 font-semibold rounded-full transition-all duration-200',
+        'inline-flex items-center gap-1.5 font-semibold rounded-full transition-all duration-200 whitespace-nowrap shrink-0 max-w-full truncate',
         size === 'sm' ? 'px-2.5 py-1 text-[10px]' : 'px-3 py-1.5 text-xs',
         config.color
       )}
     >
-      {showIcon && config.icon}
-      {config.label}
+      {showIcon && <span className="shrink-0 flex items-center justify-center">{config.icon}</span>}
+      <span className="truncate">{config.label}</span>
     </span>
   );
 }

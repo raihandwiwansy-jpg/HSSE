@@ -259,13 +259,13 @@ export default function MasterDataTable({ type, onBack, title }: Props) {
                     </p>
                   </td>
                 ))}
-                <td className="px-2.5 py-1.5">
-                  <div className="flex items-center justify-center gap-1 opacity-70 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => { setEditItem(item); setShowForm(true); }} className="p-1 text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-md transition-all" title="Edit">
-                      <Edit size={14} />
+                <td className="px-2.5 py-1.5 whitespace-nowrap">
+                  <div className="flex items-center justify-center gap-1 opacity-70 group-hover:opacity-100 transition-opacity shrink-0">
+                    <button onClick={() => { setEditItem(item); setShowForm(true); }} className="p-1 text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-md transition-all shrink-0" title="Edit">
+                      <Edit size={14} className="shrink-0" />
                     </button>
-                    <button onClick={() => handleDelete(item.id)} className="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-all" title="Hapus">
-                      <Trash2 size={14} />
+                    <button onClick={() => handleDelete(item.id)} className="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-all shrink-0" title="Hapus">
+                      <Trash2 size={14} className="shrink-0" />
                     </button>
                   </div>
                 </td>
