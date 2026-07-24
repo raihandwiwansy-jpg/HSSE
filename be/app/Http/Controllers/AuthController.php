@@ -333,7 +333,7 @@ class AuthController extends Controller
     public function uploadAvatar(Request $request)
     {
         $request->validate([
-            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
         ]);
 
         $user = $request->user();
@@ -358,7 +358,7 @@ class AuthController extends Controller
     public function updateProfilePhoto(Request $request)
     {
         $request->validate([
-            'photo' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'photo' => 'required|image|mimes:jpeg,png,jpg|max:10240',
         ]);
 
         $user = $request->user();

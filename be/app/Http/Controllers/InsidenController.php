@@ -80,7 +80,7 @@ class InsidenController extends Controller
             'tanggal_kejadian' => 'required|date',
             'deskripsi' => 'required|string',
             'foto' => 'nullable|string', // Base64 or URL
-            'foto_file' => 'nullable|image|max:2048', // Uploaded file
+            'foto_file' => 'nullable|image|max:10240', // Uploaded file
         ]);
 
         $data = [
@@ -172,7 +172,7 @@ class InsidenController extends Controller
             'tanggal_kejadian' => 'sometimes|required|date',
             'deskripsi' => 'sometimes|required|string',
             'foto' => 'nullable|string', // Base64
-            'foto_file' => 'nullable|image|max:2048',
+            'foto_file' => 'nullable|image|max:10240',
         ]);
 
         $data = [];

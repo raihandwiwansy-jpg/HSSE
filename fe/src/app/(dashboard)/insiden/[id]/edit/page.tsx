@@ -243,7 +243,7 @@ export default function EditInsidenPage() {
                 <div className="relative rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-750 bg-gray-50 dark:bg-gray-800 p-2 max-w-sm">
                   <div className="relative aspect-video w-full rounded-xl overflow-hidden">
                     <Image
-                      src={preview || `${process.env.NEXT_PUBLIC_API_URL}/storage/${currentFoto}`}
+                      src={preview || `${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000').replace('/api', '')}/storage/${currentFoto}`}
                       alt="Bukti Foto"
                       fill
                       className="object-cover"

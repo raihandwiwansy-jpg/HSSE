@@ -59,7 +59,7 @@ class SafetyPatrolController extends Controller
             'due_date' => 'nullable|date',
             'catatan' => 'nullable|string',
             'foto' => 'nullable|array',
-            'foto.*' => 'image|max:5120',
+            'foto.*' => 'image|max:10240',
         ]);
 
         $observationData = $validated['observation_data']
@@ -134,7 +134,7 @@ class SafetyPatrolController extends Controller
             'due_date' => 'nullable|date',
             'catatan' => 'nullable|string',
             'foto' => 'nullable|array',
-            'foto.*' => 'image|max:5120',
+            'foto.*' => 'image|max:10240',
         ]);
 
         if ($validated['observation_data']) {

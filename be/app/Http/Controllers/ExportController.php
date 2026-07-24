@@ -518,7 +518,7 @@ class ExportController extends Controller
         }
 
         $request->validate([
-            'foto' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'foto' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
         ]);
 
         // Hapus foto lama jika ada
@@ -541,7 +541,7 @@ class ExportController extends Controller
     public function uploadProfileFoto(Request $request)
     {
         $request->validate([
-            'foto' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'foto' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
         ]);
 
         $user = $request->user();

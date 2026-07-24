@@ -185,7 +185,7 @@ export default function InsidenDetailPage() {
                 <h3 className="text-sm font-semibold text-gray-850 dark:text-white">Foto Bukti Lapangan</h3>
                 <div className="relative aspect-video w-full max-w-lg rounded-xl overflow-hidden border border-gray-200 dark:border-gray-750">
                   <Image
-                    src={`${process.env.NEXT_PUBLIC_API_URL}/storage/${insiden.foto}`}
+                    src={`${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000').replace('/api', '')}/storage/${insiden.foto}`}
                     alt="Bukti Insiden"
                     fill
                     className="object-cover"
