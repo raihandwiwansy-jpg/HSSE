@@ -279,35 +279,7 @@ export default function PermitDetailPage() {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-          {canSub&&<Button size="sm" onClick={()=>subMut.mutate(p.id)} isLoading={subMut.isPending}><Send size={14}/> Submit ke Supervisor</Button>}
-          {canCom&&!showCompletionForm&&<Button size="sm" onClick={()=>setShowCompletionForm(true)}><CircleCheck size={14}/> Isi Form Selesai Kerja</Button>}
-          {!canConfirm&&p.status==='work_ready'&&user?.role==='admin'&&!allRolesDone&&<span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"><Clock size={14}/> Menunggu Sign-off Semua Pihak</span>}
-          {canConfirm&&<Button variant="success" size="sm" onClick={()=>confirmComMut.mutate({id:p.id})} isLoading={confirmComMut.isPending}><CheckCircle size={14}/> Konfirmasi & Tutup Permit</Button>}
-          {p.status==='completed'&&<span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"><CircleCheck size={14}/> Permit Selesai</span>}
-          {(canSPV||canHSE)&&(<>
-            <Button variant="success" size="sm" onClick={()=>{setActType('approve');setShowCatatan(true);}}><CheckCircle size={14}/> Setujui</Button>
-            <Button variant="danger" size="sm" onClick={()=>{setActType('reject');setShowCatatan(true);}}><XCircle size={14}/> Tolak</Button>
-          </>)}
-          {canEdit&&<Button variant="outline" size="sm" onClick={()=>router.push(`/permit/${p.id}/edit`)}><Edit size={14}/> Edit</Button>}
-          {user?.role==='admin' && (
-            <>
-              <Button variant="outline" size="sm" onClick={() => { setJsaRows((p?.detail?.detail_data?.jsa_tahapan as any[]) || []); setShowJsaEdit(true); }}>
-                <ClipboardList size={14}/> Edit JSA
-              </Button>
-              <Button variant="danger" size="sm" onClick={()=>setShowDeleteConfirm(true)}><Trash2 size={14}/> Hapus</Button>
-            </>
-          )}
-          {user?.role!=='admin' && (p.status==='draft'||p.status==='completed') && (
-            <Button variant="danger" size="sm" onClick={()=>setShowDeleteConfirm(true)}><Trash2 size={14}/> Hapus</Button>
-          )}
-          {canPrint&&(
-            <>
-              <Button variant="secondary" size="sm" onClick={()=>setShowPrintView(true)}><Printer size={14}/> Cetak Laporan</Button>
-              <Button variant="secondary" size="sm" onClick={()=>setShowJsaPrintView(true)}><FileText size={14}/> Cetak JSA</Button>
-            </>
-          )}
-        </div>
+        {/* Action buttons moved to the bottom */}
       </div>
 
       {/* Workflow Timeline (Responsive) */}
@@ -445,26 +417,88 @@ export default function PermitDetailPage() {
 
       {/* View Completed Completion Data (read-only for supervisor/admin) */}
       {canViewCompletion && p.completion_data && Object.keys(p.completion_data as Record<string, unknown>).length > 0 && (
-        <div className="bg-white dark:bg-gray-900 rounded-2xl p-4 sm:p-5 border border-gray-200 dark:border-gray-700 shadow-sm space-y-3">
-          <h3 className="font-semibold text-gray-800 dark:text-white text-sm flex items-center gap-2">
-            <CircleCheck size={14} className="text-green-500"/> Data Penyelesaian Pekerjaan
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {Object.entries(p.completion_data as Record<string, unknown>).filter(([k]) => !['role_completion','hse_review'].includes(k)).map(([k, v]) => {
-              if (v === null || v === undefined || v === '') return null;
-              let display = String(v);
-              if (typeof v === 'boolean') display = v ? 'Ya' : 'Tidak';
-              else if (Array.isArray(v)) display = v.join(', ');
-              else if (typeof v === 'object') display = JSON.stringify(v);
-              return (
-                <div key={k} className="bg-gray-50 dark:bg-gray-700/50 p-2.5 rounded-lg border border-gray-100 dark:border-gray-600/50">
-                  <p className="text-[10px] text-gray-500 dark:text-gray-400 mb-0.5 uppercase tracking-wider">{k.replace(/_/g, ' ')}</p>
-                  <p className="text-xs font-medium text-gray-800 dark:text-white">{display}</p>
+        <DetailCard title="Data Penyelesaian Pekerjaan" icon={<CircleCheck size={14} className="text-green-500"/>}>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* User Section */}
+            <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-xl border border-gray-150 dark:border-gray-700/50">
+              <h4 className="text-xs font-bold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                <User size={14} className="text-blue-500"/> A. Pemohon
+              </h4>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400 mb-0.5 uppercase tracking-wider">Nama Pelaksana</p>
+                  <p className="text-xs font-medium text-gray-800 dark:text-white">{String((p.completion_data as Record<string, unknown>).user_nama || '-')}</p>
                 </div>
-              );
-            })}
+                <div>
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400 mb-0.5 uppercase tracking-wider">Waktu Selesai</p>
+                  <p className="text-xs font-medium text-gray-800 dark:text-white">{String((p.completion_data as Record<string, unknown>).user_completed_at || '-')}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Supervisor Section */}
+            <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-xl border border-gray-150 dark:border-gray-700/50">
+              <h4 className="text-xs font-bold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                <Shield size={14} className="text-blue-500"/> B. Supervisor / Pemilik Lokasi
+              </h4>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400 mb-0.5 uppercase tracking-wider">Nama Supervisor</p>
+                  <p className="text-xs font-medium text-gray-800 dark:text-white">{String((p.completion_data as Record<string, unknown>).supervisor_nama || '-')}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400 mb-0.5 uppercase tracking-wider">Waktu Konfirmasi</p>
+                  <p className="text-xs font-medium text-gray-800 dark:text-white">{String((p.completion_data as Record<string, unknown>).supervisor_completed_at || '-')}</p>
+                </div>
+                {(p.completion_data as Record<string, unknown>).pekerjaan_selesai !== undefined && (
+                  <div className="pt-2 border-t border-gray-200 dark:border-gray-700 space-y-1">
+                    <p className="text-[10px] font-medium text-gray-600 dark:text-gray-400 flex justify-between">
+                      <span>Pekerjaan Selesai & Aman:</span> 
+                      <span className={(p.completion_data as Record<string, unknown>).pekerjaan_selesai ? 'text-green-600' : 'text-red-600'}>{(p.completion_data as Record<string, unknown>).pekerjaan_selesai ? 'Ya' : 'Tidak'}</span>
+                    </p>
+                    <p className="text-[10px] font-medium text-gray-600 dark:text-gray-400 flex justify-between">
+                      <span>Area Bersih:</span> 
+                      <span className={(p.completion_data as Record<string, unknown>).area_bersih ? 'text-green-600' : 'text-red-600'}>{(p.completion_data as Record<string, unknown>).area_bersih ? 'Ya' : 'Tidak'}</span>
+                    </p>
+                    <p className="text-[10px] font-medium text-gray-600 dark:text-gray-400 flex justify-between">
+                      <span>Peralatan Dikembalikan:</span> 
+                      <span className={(p.completion_data as Record<string, unknown>).peralatan_aman ? 'text-green-600' : 'text-red-600'}>{(p.completion_data as Record<string, unknown>).peralatan_aman ? 'Ya' : 'Tidak'}</span>
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Admin HSE Section */}
+            <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-xl border border-gray-150 dark:border-gray-700/50">
+              <h4 className="text-xs font-bold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                <Stamp size={14} className="text-blue-500"/> C. Admin HSSE
+              </h4>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400 mb-0.5 uppercase tracking-wider">Admin Pemeriksa</p>
+                  <p className="text-xs font-medium text-gray-800 dark:text-white">{String((p.completion_data as Record<string, unknown>).admin_hse_nama || '-')}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400 mb-0.5 uppercase tracking-wider">Asisten</p>
+                  <p className="text-xs font-medium text-gray-800 dark:text-white">{String((p.completion_data as Record<string, unknown>).admin_asisten_nama || '-')}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400 mb-0.5 uppercase tracking-wider">Waktu Konfirmasi</p>
+                  <p className="text-xs font-medium text-gray-800 dark:text-white">{String((p.completion_data as Record<string, unknown>).admin_completed_at || '-')}</p>
+                </div>
+                {(p.completion_data as Record<string, unknown>).deisolasi_diperlukan !== undefined && (
+                  <div className="pt-2 border-t border-gray-200 dark:border-gray-700 space-y-1">
+                    <p className="text-[10px] font-medium text-gray-600 dark:text-gray-400 flex justify-between">
+                      <span>Perlu De-isolasi:</span> 
+                      <span className={(p.completion_data as Record<string, unknown>).deisolasi_diperlukan ? 'text-amber-600' : 'text-gray-500'}>{(p.completion_data as Record<string, unknown>).deisolasi_diperlukan ? 'Ya' : 'Tidak'}</span>
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
+        </DetailCard>
       )}
 
       {/* Info Cards */}
@@ -562,6 +596,37 @@ export default function PermitDetailPage() {
           {p.completed_at&&<TimestampItem label="Selesai" value={p.completed_at}/>}
         </div>
       </DetailCard>
+
+      {/* Action Buttons (Moved to bottom) */}
+      <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-800 flex items-center gap-2 justify-end flex-wrap">
+        {canSub&&<Button size="sm" onClick={()=>subMut.mutate(p.id)} isLoading={subMut.isPending}><Send size={14}/> Submit ke Supervisor</Button>}
+        {canCom&&!showCompletionForm&&<Button size="sm" onClick={()=>setShowCompletionForm(true)}><CircleCheck size={14}/> Isi Form Selesai Kerja</Button>}
+        {!canConfirm&&p.status==='work_ready'&&user?.role==='admin'&&!allRolesDone&&<span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"><Clock size={14}/> Menunggu Sign-off Semua Pihak</span>}
+        {canConfirm&&<Button variant="success" size="sm" onClick={()=>confirmComMut.mutate({id:p.id})} isLoading={confirmComMut.isPending}><CheckCircle size={14}/> Konfirmasi & Tutup Permit</Button>}
+        {p.status==='completed'&&<span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"><CircleCheck size={14}/> Permit Selesai</span>}
+        {(canSPV||canHSE)&&(<>
+          <Button variant="success" size="sm" onClick={()=>{setActType('approve');setShowCatatan(true);}}><CheckCircle size={14}/> Setujui</Button>
+          <Button variant="danger" size="sm" onClick={()=>{setActType('reject');setShowCatatan(true);}}><XCircle size={14}/> Tolak</Button>
+        </>)}
+        {canEdit&&<Button variant="outline" size="sm" onClick={()=>router.push(`/permit/${p.id}/edit`)}><Edit size={14}/> Edit</Button>}
+        {user?.role==='admin' && (
+          <>
+            <Button variant="outline" size="sm" onClick={() => { setJsaRows((p?.detail?.detail_data?.jsa_tahapan as any[]) || []); setShowJsaEdit(true); }}>
+              <ClipboardList size={14}/> Edit JSA
+            </Button>
+            <Button variant="danger" size="sm" onClick={()=>setShowDeleteConfirm(true)}><Trash2 size={14}/> Hapus</Button>
+          </>
+        )}
+        {user?.role!=='admin' && (p.status==='draft'||p.status==='completed') && (
+          <Button variant="danger" size="sm" onClick={()=>setShowDeleteConfirm(true)}><Trash2 size={14}/> Hapus</Button>
+        )}
+        {canPrint&&(
+          <>
+            <Button variant="secondary" size="sm" onClick={()=>setShowPrintView(true)}><Printer size={14}/> Cetak Laporan</Button>
+            <Button variant="secondary" size="sm" onClick={()=>setShowJsaPrintView(true)}><FileText size={14}/> Cetak JSA</Button>
+          </>
+        )}
+      </div>
     </div>
 
     {/* Print View Overlay */}
