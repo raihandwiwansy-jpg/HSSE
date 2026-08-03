@@ -3,291 +3,201 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import axios from 'axios';
+import { ClipboardCheck, ShieldAlert, Activity, UserCheck, Shield, ChevronRight, CheckCircle2, Clock } from 'lucide-react';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api',
 });
 
-export default function LandingPage() {
-  const [stats, setStats] = useState({
-    board_month: '-',
-    board_year: '-',
-    working_days: { last_month: '0', this_month: '0' },
-    safe_manhours: { last_month: '0', this_month: '0' },
-    safe_manhours_recap: '0',
-    last_accident: '-',
-    current_datetime: { day: '0', hours: '00:00', date: '-' }
-  });
+interface DashboardData {
+  total_permits: number;
+  permits_completed: number;
+  total_insiden: number;
+  insiden_this_month: number;
+  total_safety_behavior: number;
+  safety_behavior_this_month: number;
+  total_safety_patrol: number;
+  total_karyawan: number;
+  last_accident_date: string | null;
+  recent_activities: any[];
+}
 
+export default function LandingPage() {
+  const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchData = async () => {
       try {
-        const res = await api.get('/landing-stats');
+        const res = await api.get('/public-dashboard');
         if (res.data.success) {
-          setStats(res.data.data);
+          setData(res.data.data);
         }
       } catch (err) {
-        console.error("Failed to load stats", err);
+        console.error("Failed to load dashboard data", err);
       } finally {
         setLoading(false);
       }
     };
-    fetchStats();
+    fetchData();
     
-    const interval = setInterval(fetchStats, 60000);
+    const interval = setInterval(fetchData, 60000);
     return () => clearInterval(interval);
   }, []);
 
   if (loading) {
-    return <div className="min-h-screen bg-[#1E88E5] flex items-center justify-center text-white font-bold">Memuat Papan Informasi...</div>;
-  }
-
-  // Helper for physical-style yellow number blocks
-  const renderYellowBlocks = (value: string | number) => {
-    const str = String(value).replace(/,/g, '');
-    const len = str.length;
-    // Auto-scale on mobile depending on digits count (supports up to 7+ digits cleanly)
-    const mobileWidth = len >= 7 ? 'w-[17px] h-7 text-[10px]' : len >= 6 ? 'w-5 h-8 text-xs' : 'w-6 h-8 text-base';
     return (
-      <div className="flex gap-0.5 sm:gap-1">
-        {str.split('').map((char, i) => (
-          <div key={i} className={`${mobileWidth} sm:w-10 sm:h-12 bg-[#FFEB3B] text-black font-bold sm:text-2xl flex items-center justify-center rounded-sm shadow-[inset_0_-2px_4px_rgba(0,0,0,0.2)] border border-[#FBC02D] font-mono`}>
-            {char}
-          </div>
-        ))}
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center justify-center">
+        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4" />
+        <p className="text-gray-500 font-medium">Memuat Papan Informasi...</p>
       </div>
     );
-  };
+  }
+
+  const StatCard = ({ icon: Icon, title, value, subtitle, colorClass }: any) => (
+    <div className={`bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700/50 flex flex-col relative overflow-hidden group hover:shadow-md transition-shadow`}>
+      <div className={`absolute -right-6 -top-6 w-24 h-24 rounded-full opacity-10 transition-transform group-hover:scale-150 ${colorClass}`} />
+      <div className="flex justify-between items-start mb-4">
+        <div className={`p-3 rounded-xl ${colorClass} bg-opacity-10 dark:bg-opacity-20`}>
+          <Icon className={`w-6 h-6 ${colorClass.replace('bg-', 'text-')}`} />
+        </div>
+      </div>
+      <div>
+        <h3 className="text-3xl font-bold text-gray-800 dark:text-white mb-1">{value}</h3>
+        <p className="text-sm font-semibold text-gray-600 dark:text-gray-300">{title}</p>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{subtitle}</p>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-gray-200 flex flex-col items-center justify-center p-2 sm:p-4 lg:py-8 font-sans relative">
-      
-      {/* Login Button - Kept minimal in top right */}
-      <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-50">
-        <Link href="/login" className="bg-white/50 hover:bg-white text-gray-700 px-2.5 py-1 sm:px-4 sm:py-2 rounded font-bold text-xs sm:text-sm transition-all border border-gray-300 shadow">
-          Login &rarr;
-        </Link>
-      </div>
-
-      {/* Main Board Container - Matching the physical board */}
-      <div className="w-full max-w-[1000px] bg-white rounded-md shadow-2xl overflow-hidden border-[6px] sm:border-[12px] border-gray-300 flex flex-col">
-        
-        {/* WHITE HEADER SECTION */}
-        <div className="bg-white px-3 sm:px-8 py-2.5 sm:py-3.5 relative flex flex-col gap-1.5 sm:gap-3 shrink-0">
-          {/* Top Row: Logos & Titles */}
-          <div className="flex justify-between items-center">
-            
-            {/* Left side: Text & Logo */}
-            <div className="flex flex-col">
-              <h1 className="text-sm sm:text-2xl md:text-3xl font-black uppercase tracking-wide leading-none">
-                PT. INDUSTRI NABATI LESTARI
-              </h1>
-              <p className="text-green-700 font-bold italic text-[8px] sm:text-xs tracking-widest mt-1 sm:mt-1.5">
-                PALM OIL REFINERY & FRACTIONATION
-              </p>
-            </div>
-
-            {/* Right side: Subsidiary Logos */}
-            <div className="hidden sm:flex flex-col items-end">
-              <p className="text-[10px] font-bold text-gray-800 mb-1">SUBSIDIARY OF :</p>
-              <div className="flex gap-1.5 items-center">
-                 <div className="h-7 w-[56px] relative">
-                    <Image src="/Picture1.png" alt="Logo INL" fill className="object-contain" priority />
-                 </div>
-                 <div className="h-7 w-[72px] relative">
-                    <Image src="/Logo_Holding_Perkebunan_Nusantara_III.png" alt="Logo Holding Perkebunan Nusantara" fill className="object-contain" priority />
-                 </div>
-                 <div className="h-7 w-[34px] relative">
-                    <Image src="/Logo_PTPN_IV.png" alt="Logo PTPN IV" fill className="object-contain" priority />
-                 </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans pb-12">
+      {/* Top Navigation / Header */}
+      <nav className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 relative bg-transparent rounded overflow-hidden">
+                <Image src="/Picture1.png" alt="Logo INL" fill className="object-contain" priority />
+              </div>
+              <div>
+                <h1 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white leading-tight uppercase">PT. INDUSTRI NABATI LESTARI</h1>
+                <p className="text-[10px] text-green-600 dark:text-green-400 font-medium tracking-wider">HSE PERFORMANCE BOARD</p>
               </div>
             </div>
-          </div>
-
-          {/* Center Titles */}
-          <div className="text-center">
-            <h2 className="text-xs sm:text-xl md:text-3xl font-black uppercase tracking-wider leading-none text-[#1976D2]">
-              INFORMASI KESELAMATAN KERJA
-            </h2>
-            <h3 className="text-[9px] sm:text-sm md:text-base font-bold uppercase tracking-widest mt-0.5 sm:mt-1 text-[#0D47A1]">
-              HSE PERFORMANCE BOARD
-            </h3>
+            <Link href="/login" className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors">
+              Masuk <ChevronRight size={16} />
+            </Link>
           </div>
         </div>
+      </nav>
 
-        {/* BLUE MAIN SECTION */}
-        <div className="bg-[#1E88E5] text-white flex-1 p-2 sm:p-4 flex flex-col justify-between">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        {/* Board Header Section */}
+        <div className="text-center mb-10 animate-fade-in-up">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
+            Informasi Keselamatan Kerja
+          </h2>
+          <p className="mt-3 text-sm sm:text-base text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
+            Pantauan langsung (real-time) mengenai data izin kerja, insiden, patroli keselamatan, dan observasi perilaku kerja di lingkungan perusahaan.
+          </p>
+        </div>
+
+        {/* Main Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+          <StatCard 
+            icon={ClipboardCheck} 
+            title="Total Izin Kerja" 
+            value={data?.total_permits || 0} 
+            subtitle={`${data?.permits_completed || 0} telah selesai`} 
+            colorClass="bg-blue-500" 
+          />
+          <StatCard 
+            icon={ShieldAlert} 
+            title="Total Insiden" 
+            value={data?.total_insiden || 0} 
+            subtitle={`${data?.insiden_this_month || 0} insiden bulan ini`} 
+            colorClass="bg-red-500" 
+          />
+          <StatCard 
+            icon={Activity} 
+            title="Safety Behavior" 
+            value={data?.total_safety_behavior || 0} 
+            subtitle={`${data?.safety_behavior_this_month || 0} observasi bulan ini`} 
+            colorClass="bg-amber-500" 
+          />
+          <StatCard 
+            icon={Shield} 
+            title="Safety Patrol" 
+            value={data?.total_safety_patrol || 0} 
+            subtitle={`${data?.total_karyawan || 0} karyawan terdaftar`} 
+            colorClass="bg-emerald-500" 
+          />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
           
-          {/* SAFETY STATUS ROW (TOP BLUE BAR) */}
-          <div className="border-b-2 border-white/40 pb-2 mb-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div className="text-base sm:text-2.5xl font-bold uppercase tracking-widest text-center sm:text-left">
-              SAFETY STATUS
-            </div>
-            
-            <div className="flex items-center justify-center gap-4 sm:gap-12">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <div className="text-right text-[8px] sm:text-xs font-bold uppercase leading-tight">
-                  <p>BULAN</p>
-                  <p className="opacity-80">MONTHLY</p>
-                </div>
-                {renderYellowBlocks(stats.board_month)}
+          {/* Highlight Section */}
+          <div className="lg:col-span-1 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700/50 p-6 flex flex-col justify-center">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle2 size={32} className="text-green-600 dark:text-green-400" />
               </div>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Status Area Aman</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Selalu utamakan keselamatan dalam setiap langkah pekerjaan Anda.</p>
               
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <div className="text-right text-[8px] sm:text-xs font-bold uppercase leading-tight">
-                  <p>TAHUN</p>
-                  <p className="opacity-80">YEAR</p>
-                </div>
-                {renderYellowBlocks(stats.board_year)}
+              <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Terakhir Kecelakaan Kerja</p>
+                <p className="text-lg font-bold text-gray-800 dark:text-white">
+                  {data?.last_accident_date 
+                    ? new Date(data.last_accident_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) 
+                    : 'Tidak ada catatan kecelakaan'}
+                </p>
               </div>
             </div>
           </div>
 
-          {/* MAIN GRID - 3 COLUMNS */}
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_auto] gap-y-4 lg:gap-x-8 lg:gap-y-4 items-center w-full my-auto">
+          {/* Recent Activities */}
+          <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700/50 p-6 flex flex-col">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+              <Clock size={18} className="text-blue-500" />
+              Aktivitas Terbaru
+            </h3>
             
-            {/* HEADERS ROW (Desktop Only) */}
-            <div className="hidden lg:block"></div> {/* Empty top-left */}
-            <div className="text-center text-xs font-bold uppercase leading-tight hidden lg:block">
-              <p>BULAN KEMARIN</p>
-              <p className="opacity-90">LAST MONTH</p>
-            </div>
-            <div className="text-center text-xs font-bold uppercase leading-tight hidden lg:block">
-              <p>BULAN INI</p>
-              <p className="opacity-90">THIS MONTH</p>
-            </div>
+            <div className="flex-1 overflow-y-auto max-h-[300px] pr-2 space-y-3 custom-scrollbar">
+              {data?.recent_activities && data.recent_activities.length > 0 ? (
+                data.recent_activities.map((act: any, i: number) => {
+                  let typeColor = 'bg-gray-100 text-gray-600';
+                  let typeLabel = 'Lainnya';
+                  
+                  if (act.type === 'permit') { typeColor = 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'; typeLabel = 'Izin Kerja'; }
+                  else if (act.type === 'insiden') { typeColor = 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'; typeLabel = 'Insiden'; }
+                  else if (act.type === 'safety_behavior') { typeColor = 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'; typeLabel = 'Behavior'; }
+                  else if (act.type === 'safety_patrol') { typeColor = 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'; typeLabel = 'Patrol'; }
 
-            {/* ROW 1: TOTAL WORKING DAYS */}
-            <div className="col-span-1 lg:col-span-3 lg:contents border-b border-white/20 pb-3 lg:pb-0">
-              <div className="text-[10px] sm:text-xs md:text-sm font-bold uppercase leading-tight mb-2 lg:mb-0">
-                <p>JUMLAH HARI KERJA SAMPAI HARI INI</p>
-                <p className="font-normal opacity-85 text-[8px] sm:text-xs">TOTAL WORKING DAYS UP TO DATE</p>
-              </div>
-              <div className="flex items-center justify-between lg:contents w-full">
-                <div className="flex flex-col items-center lg:items-stretch">
-                  <span className="lg:hidden text-[7px] font-bold opacity-80 mb-1">BULAN KEMARIN</span>
-                  {renderYellowBlocks(stats.working_days.last_month)}
-                </div>
-                <div className="flex flex-col items-center lg:items-stretch">
-                  <span className="lg:hidden text-[7px] font-bold opacity-80 mb-1">BULAN INI</span>
-                  <div className="flex items-center gap-1 sm:gap-2">
-                    {renderYellowBlocks(stats.working_days.this_month)}
-                    <div className="text-[8px] sm:text-xs font-bold uppercase leading-none shrink-0">
-                      <p>HARI</p>
-                      <p className="opacity-80">DAY</p>
+                  return (
+                    <div key={i} className="flex items-start gap-4 p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-colors">
+                      <div className={`mt-0.5 shrink-0 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${typeColor}`}>
+                        {typeLabel}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">{act.title || 'Dokumen'}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Oleh: <span className="font-medium text-gray-700 dark:text-gray-300">{act.user || '-'}</span></p>
+                      </div>
+                      <div className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap shrink-0">
+                        {new Date(act.time).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </div>
+                  );
+                })
+              ) : (
+                <div className="text-center py-8 text-gray-500 text-sm">Belum ada aktivitas terbaru hari ini.</div>
+              )}
             </div>
-
-            {/* ROW 2: TOTAL MANHOURS */}
-            <div className="col-span-1 lg:col-span-3 lg:contents border-b border-white/20 pb-3 lg:pb-0">
-              <div className="text-[10px] sm:text-xs md:text-sm font-bold uppercase leading-tight mb-2 lg:mb-0">
-                <p>JUMLAH JAM KERJA TANPA KECELAKAAN</p>
-                <p className="font-normal opacity-85 text-[8px] sm:text-xs">TOTAL MANHOURS WORKED WITHOUT LOSE ACCIDENT</p>
-              </div>
-              <div className="flex items-center justify-between lg:contents w-full">
-                <div className="flex flex-col items-center lg:items-stretch">
-                  <span className="lg:hidden text-[7px] font-bold opacity-80 mb-1">BULAN KEMARIN</span>
-                  {renderYellowBlocks(stats.safe_manhours.last_month)}
-                </div>
-                <div className="flex flex-col items-center lg:items-stretch">
-                  <span className="lg:hidden text-[7px] font-bold opacity-80 mb-1">BULAN INI</span>
-                  <div className="flex items-center gap-1 sm:gap-2">
-                    {renderYellowBlocks(stats.safe_manhours.this_month)}
-                    <div className="text-[8px] sm:text-xs font-bold uppercase leading-none shrink-0">
-                      <p>JAM</p>
-                      <p className="opacity-80">HOURS</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* ROW 3: TOTAL SAFE WORKED DAYS */}
-            <div className="col-span-1 lg:col-span-3 lg:contents border-b border-white/20 pb-3 lg:pb-0">
-              <div className="text-[10px] sm:text-xs md:text-sm font-bold uppercase leading-tight mb-2 lg:mb-0">
-                <p>JUMLAH JAM KERJA SELAMAT</p>
-                <p className="font-normal opacity-85 text-[8px] sm:text-xs">TOTAL SAFE WORKED DAYS</p>
-              </div>
-              <div className="flex items-center justify-between lg:contents w-full">
-                <div className="flex flex-col items-center lg:items-stretch">
-                  <span className="lg:hidden text-[7px] font-bold opacity-80 mb-1">BULAN KEMARIN</span>
-                  {renderYellowBlocks(stats.safe_manhours.last_month)}
-                </div>
-                <div className="flex flex-col items-center lg:items-stretch">
-                  <span className="lg:hidden text-[7px] font-bold opacity-80 mb-1">BULAN INI</span>
-                  <div className="flex items-center gap-1 sm:gap-2">
-                    {renderYellowBlocks(stats.safe_manhours.this_month)}
-                    <div className="text-[8px] sm:text-xs font-bold uppercase leading-none shrink-0">
-                      <p>JAM</p>
-                      <p className="opacity-80">HOURS</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
           </div>
 
-          {/* BOTTOM OF BLUE SECTION: LAST ACCIDENT, RECAP & DATE */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 mt-3">
-            
-            {/* Left section: Last Accident & Recap */}
-            <div className="flex flex-col gap-2.5 w-full md:w-auto">
-              {/* Last Accident Row */}
-              <div className="flex items-center justify-between gap-2 w-full md:w-auto">
-                <div className="text-[9px] sm:text-xs font-bold uppercase leading-tight w-36 sm:w-52 md:w-56 shrink-0">
-                  <p>KECELAKAAN TERAKHIR</p>
-                  <p className="font-normal opacity-85 text-[7px] sm:text-[10px]">LAST ACCIDENT</p>
-                </div>
-                <div className="bg-white text-black font-bold text-xs sm:text-base md:text-lg px-2 sm:px-6 py-1 flex-1 md:w-64 text-center rounded-sm shadow-[inset_0_-2px_4px_rgba(0,0,0,0.2)]">
-                   {stats.last_accident !== '-' ? stats.last_accident : ''}
-                </div>
-              </div>
-
-              {/* Recap Row */}
-              <div className="flex items-center justify-between gap-2 w-full md:w-auto">
-                <div className="text-[9px] sm:text-xs font-bold uppercase leading-tight w-36 sm:w-52 md:w-56 shrink-0">
-                  <p>REKAPAN JAM KERJA SELAMAT (2018-2025)</p>
-                  <p className="font-normal opacity-85 text-[7px] sm:text-[10px]">SAFE MANHOURS RECAP (2018-2025)</p>
-                </div>
-                <div className="bg-white text-black font-bold text-xs sm:text-base md:text-lg px-2 sm:px-6 py-1 flex-1 md:w-64 text-center rounded-sm shadow-[inset_0_-2px_4px_rgba(0,0,0,0.2)]">
-                   {stats.safe_manhours_recap || '0'}
-                </div>
-              </div>
-            </div>
-
-            {/* Date Section */}
-            <div className="flex items-center justify-between w-full md:w-auto gap-2 md:self-end sm:ml-auto">
-               <div className="text-left md:text-center text-[9px] sm:text-xs font-bold uppercase leading-tight w-16 sm:w-auto shrink-0">
-                 <p>TANGGAL</p>
-                 <p className="opacity-85 text-[7px] sm:text-[10px]">DATE</p>
-               </div>
-               <div className="bg-white text-black font-bold text-xs sm:text-base md:text-lg px-2 sm:px-6 py-1 w-28 sm:w-40 md:w-48 text-center rounded-sm shadow-[inset_0_-2px_4px_rgba(0,0,0,0.2)]">
-                  {stats.current_datetime.date}
-               </div>
-            </div>
-          </div>
         </div>
-
-        {/* BOTTOM LIGHT BLUE STRIPS */}
-        <div className="bg-[#4FC3F7] border-t border-b border-white text-[#0D47A1] grid grid-cols-3 text-center py-1 text-[9px] sm:text-[11px] font-bold uppercase tracking-widest">
-           <div>INTEGRITY</div>
-           <div>NOTHING IMPOSSIBLE</div>
-           <div>LEADERSHIP</div>
-        </div>
-
-        {/* BOTTOM DARKER STRIP */}
-        <div className="bg-[#29B6F6] text-white text-center py-2 flex flex-col items-center px-2">
-           <p className="font-bold text-[9px] sm:text-sm uppercase tracking-widest text-center">KESELAMATAN ADALAH TANGGUNG JAWAB SEMUA ORANG</p>
-           <p className="font-semibold text-[7px] sm:text-xs uppercase tracking-widest opacity-90 text-center mt-0.5">SAFETY IS EVERYONE&apos;S RESPONSIBILITY</p>
-        </div>
-
-      </div>
+      </main>
     </div>
   );
 }

@@ -115,8 +115,8 @@ export default function ProfilePage() {
       {/* Profile Card */}
       <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
         
-        {/* Cover gradient */}
-        <div className="h-24 bg-gradient-to-r from-blue-500 via-violet-500 to-blue-600 relative">
+        {/* Cover solid */}
+        <div className="h-24 bg-blue-600 relative">
           <div className="absolute inset-0 bg-black/10" />
         </div>
 
@@ -133,7 +133,7 @@ export default function ProfilePage() {
                 {displayPhoto ? (
                   <img src={displayPhoto} alt={user.name} className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500 to-violet-500">
+                  <div className="w-full h-full flex items-center justify-center bg-blue-600">
                     <span className="text-3xl sm:text-4xl font-bold text-white">{user.name?.charAt(0)?.toUpperCase() || 'U'}</span>
                   </div>
                 )}
