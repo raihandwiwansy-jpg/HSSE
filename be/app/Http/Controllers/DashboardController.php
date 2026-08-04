@@ -305,18 +305,42 @@ class DashboardController extends Controller
         $spByStatus = (clone $spQuery)->select('status', DB::raw('count(*) as total'))->groupBy('status')->pluck('total', 'status');
         $spThisMonth = (clone $spQuery)->whereMonth('created_at', $month)->whereYear('created_at', $year)->count();
 
+        // ========== MAN HOURS ==========
+        $totalSafeManhours = (float) \App\Models\MonthlyManHour::sum(DB::raw('(normal_jam_inl + normal_jam_kontraktor + normal_jam_outsourcing + overtime_inl + overtime_kontraktor + overtime_outsourcing) - cuti_sakit'));
+        $totalManpower = (int) \App\Models\MonthlyManHour::sum(DB::raw('manpower_inl + manpower_kontraktor + manpower_outsourcing'));
+        if ($totalManpower === 0) {
+            $totalManpower = Karyawan::count();
+        }
+
         // ========== HSE KPI ==========
-        $kpiQuery = \App\Models\HseKpiPerformance::whereYear('period_start', $year);
+        $kpiQuery = \App\Models\HseKpiPerformance::query();
         $kpiTotalEntries = (clone $kpiQuery)->count();
         $kpiTotals = [
-            'fatality' => (clone $kpiQuery)->sum('fatality'),
-            'lti' => (clone $kpiQuery)->sum('lti'),
-            'near_miss' => (clone $kpiQuery)->sum('near_miss'),
-            'hse_management_visit' => (clone $kpiQuery)->sum('hse_management_visit'),
-            'hse_toolbox_meeting' => (clone $kpiQuery)->sum('hse_toolbox_meeting'),
-            'hse_meeting' => (clone $kpiQuery)->sum('hse_meeting'),
-            'reward' => (clone $kpiQuery)->sum('reward'),
-            'punishment' => (clone $kpiQuery)->sum('punishment'),
+            'fatality' => (int) (clone $kpiQuery)->sum('fatality'),
+            'lti' => (int) (clone $kpiQuery)->sum('lti'),
+            'rwdc' => (int) (clone $kpiQuery)->sum('rwdc'),
+            'mtc' => (int) (clone $kpiQuery)->sum('mtc'),
+            'fac' => (int) (clone $kpiQuery)->sum('fac'),
+            'near_miss' => (int) (clone $kpiQuery)->sum('near_miss'),
+            'environmental_incident' => (int) (clone $kpiQuery)->sum('environmental_incident'),
+            'property_damage' => (int) (clone $kpiQuery)->sum('property_damage'),
+            'customer_formal_complaint' => (int) (clone $kpiQuery)->sum('customer_formal_complaint'),
+            'hse_management_visit' => (int) (clone $kpiQuery)->sum('hse_management_visit'),
+            'hse_joint_safety_patrol' => (int) (clone $kpiQuery)->sum('hse_joint_safety_patrol'),
+            'behavior_based_safe' => (int) (clone $kpiQuery)->sum('behavior_based_safe'),
+            'emergency_drill' => (int) (clone $kpiQuery)->sum('emergency_drill'),
+            'equipment_inspection' => (int) (clone $kpiQuery)->sum('equipment_inspection'),
+            'hse_toolbox_meeting' => (int) (clone $kpiQuery)->sum('hse_toolbox_meeting'),
+            'hse_meeting' => (int) (clone $kpiQuery)->sum('hse_meeting'),
+            'general_safety_talk' => (int) (clone $kpiQuery)->sum('general_safety_talk'),
+            'safety_stand_down_meeting' => (int) (clone $kpiQuery)->sum('safety_stand_down_meeting'),
+            'reward' => (int) (clone $kpiQuery)->sum('reward'),
+            'punishment' => (int) (clone $kpiQuery)->sum('punishment'),
+            'campaign_bulan_k3_nasional' => (int) (clone $kpiQuery)->sum('campaign_bulan_k3_nasional'),
+            'hse_induction' => (int) (clone $kpiQuery)->sum('hse_induction'),
+            'hse_training' => (int) (clone $kpiQuery)->sum('hse_training'),
+            'audit_program_internal' => (int) (clone $kpiQuery)->sum('audit_program_internal'),
+            'audit_program_eksternal' => (int) (clone $kpiQuery)->sum('audit_program_eksternal'),
         ];
 
         // ========== USERS ==========
@@ -349,6 +373,8 @@ class DashboardController extends Controller
             'success' => true,
             'data' => [
                 // Overview
+                'total_safe_manhours' => $totalSafeManhours,
+                'total_manpower' => $totalManpower,
                 'total_permits' => $permitsTotal,
                 'permits_completed' => $permitsCompleted,
                 'permits_this_month' => $permitsThisMonth,

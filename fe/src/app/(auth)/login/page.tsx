@@ -82,16 +82,27 @@ export default function LoginPage() {
           : 'bg-white border-slate-100'
           }`}>
           
-          {/* INL Logo & Branding */}
+          {/* INL & HSSE Logo & Branding */}
           <div className="text-center">
-            <div className="relative mx-auto mb-5 w-40 sm:w-48 h-12">
-              <Image
-                src="/Picture1.png"
-                alt="PT Industri Nabati Lestari Logo"
-                fill
-                className="object-contain"
-                priority
-              />
+            <div className="flex items-center justify-center gap-3 mb-5">
+              <div className="relative w-12 h-12">
+                <Image
+                  src="/logo-hsse.jpeg"
+                  alt="Logo HSSE"
+                  fill
+                  className="object-contain rounded-lg"
+                  priority
+                />
+              </div>
+              <div className="relative w-36 sm:w-40 h-10">
+                <Image
+                  src="/Picture1.png"
+                  alt="PT Industri Nabati Lestari Logo"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
             </div>
             <h2 className={`text-lg sm:text-xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-slate-800'}`}>
               PT. Industri Nabati Lestari
