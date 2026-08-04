@@ -84,10 +84,11 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-2.5 sm:gap-3">
-              <div className="w-9 h-9 relative bg-transparent rounded overflow-hidden shrink-0">
-                <Image src="/logo-hsse.jpeg" alt="Logo HSSE" fill className="object-contain rounded" priority />
+              <div className="w-8 h-8 relative bg-transparent shrink-0">
+                <Image src="/logo-hsse.png" alt="Logo HSSE" fill className="object-contain" priority />
               </div>
-              <div className="w-8 h-8 relative bg-transparent rounded overflow-hidden shrink-0">
+              <div className="h-5 w-px bg-gray-200 dark:bg-gray-700 shrink-0" />
+              <div className="w-8 h-8 relative bg-transparent shrink-0">
                 <Image src="/Picture1.png" alt="Logo INL" fill className="object-contain" priority />
               </div>
               <div>

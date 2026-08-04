@@ -84,17 +84,18 @@ export default function LoginPage() {
           
           {/* INL & HSSE Logo & Branding */}
           <div className="text-center">
-            <div className="flex items-center justify-center gap-3 mb-5">
-              <div className="relative w-12 h-12">
+            <div className="flex items-center justify-center gap-3 sm:gap-4 mb-5">
+              <div className="relative w-24 sm:w-28 h-9 sm:h-11">
                 <Image
-                  src="/logo-hsse.jpeg"
+                  src="/logo-hsse.png"
                   alt="Logo HSSE"
                   fill
-                  className="object-contain rounded-lg"
+                  className="object-contain"
                   priority
                 />
               </div>
-              <div className="relative w-36 sm:w-40 h-10">
+              <div className="h-7 w-px bg-gray-200 dark:bg-slate-700/80 shrink-0" />
+              <div className="relative w-32 sm:w-36 h-9 sm:h-11">
                 <Image
                   src="/Picture1.png"
                   alt="PT Industri Nabati Lestari Logo"

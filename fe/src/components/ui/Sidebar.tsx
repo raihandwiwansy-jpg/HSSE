@@ -124,9 +124,9 @@ export default function Sidebar({ children }: { children?: React.ReactNode }) {
 
         {/* Brand Header */}
         <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-800/80 shrink-0">
-          <div className={`flex items-center gap-3 min-w-0 ${isCollapsed ? 'mx-auto' : ''}`}>
-            <div className="w-8 h-8 rounded-lg bg-transparent flex items-center justify-center shrink-0 overflow-hidden">
-              <img src="/logo-hsse.jpeg" alt="HSSE Logo" className="w-full h-full object-contain rounded" />
+          <div className={`flex items-center gap-2.5 min-w-0 ${isCollapsed ? 'mx-auto' : ''}`}>
+            <div className="w-8 h-8 rounded-lg bg-transparent flex items-center justify-center shrink-0">
+              <img src="/logo-hsse.png" alt="HSSE Logo" className="w-full h-full object-contain" />
             </div>
             {!isCollapsed && (
               <div className="min-w-0">
