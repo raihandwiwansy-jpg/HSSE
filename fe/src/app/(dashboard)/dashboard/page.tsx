@@ -145,7 +145,7 @@ export default function DashboardPage() {
               </div>
               <div className="flex items-center gap-2 bg-black/40 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-cyan-200 backdrop-blur-md hover:border-cyan-500/30 transition-all">
                 <Trophy size={14} className="text-yellow-400" />
-                <span className="font-semibold">The Most Reliable for HSSE</span>
+                <span className="font-semibold">The Most Reliable for MS-HSSE</span>
               </div>
             </div>
           </div>
@@ -154,7 +154,7 @@ export default function DashboardPage() {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pt-4">
             <div className="backdrop-blur-md bg-black/30 dark:bg-black/50 border border-white/10 rounded-2xl p-4 sm:p-5 max-w-2xl shadow-xl">
               <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-none text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-50 to-blue-200 dark:from-blue-100 dark:via-indigo-100 dark:to-cyan-200 drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]">
-                HSSE DASHBOARD
+                MS-HSSE DASHBOARD
               </h1>
               <p className="text-xs sm:text-sm text-gray-200 dark:text-gray-300 mt-3 font-semibold tracking-wide leading-relaxed drop-shadow-[0_1px_4px_rgba(0,0,0,0.5)]">
                 Sistem monitoring terpusat untuk kesehatan, keselamatan, keamanan kerja, serta pencatatan Jam Kerja Selamat (Safe Man Hours) secara real-time.

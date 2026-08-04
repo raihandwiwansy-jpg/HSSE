@@ -108,7 +108,7 @@ export default function LoginPage() {
               PT. Industri Nabati Lestari
             </h2>
             <p className={`text-xs sm:text-sm mt-1.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-              Masuk ke dashboard manajemen HSSE
+              Masuk ke dashboard MS-HSSE ( Managemen System Health, Safety, Security, and Environment )
             </p>
           </div>
 

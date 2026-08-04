@@ -78,7 +78,7 @@ export default function Navbar() {
         <div className="flex items-center gap-1.5 min-w-0">
           <Shield size={16} className="text-blue-500 shrink-0" />
           <h1 className="text-sm sm:text-base font-bold text-gray-800 dark:text-white leading-none truncate">
-            HSSE Management
+            MS-HSSE Management
           </h1>
         </div>
         <span className="text-[10px] text-gray-500 dark:text-gray-400 capitalize px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full hidden sm:inline font-medium shrink-0">

@@ -38,10 +38,10 @@ export default function AboutTab() {
               Official Release
             </div>
             <h2 className="text-2xl font-black text-gray-850 dark:text-white tracking-tight">
-              HSSE Management System Portal
+              MS-HSSE ( Managemen System Health, Safety, Security, and Environment )
             </h2>
             <p className="text-xs text-gray-450 dark:text-gray-400 leading-relaxed max-w-xl">
-              Portal manajemen terintegrasi untuk menangani sistem keselamatan, kesehatan kerja, dan lingkungan (HSSE) di lingkungan kerja PT. Industri Nabati Lestari. Memfasilitasi penerbitan surat izin kerja (Permit to Work), pemantauan Safety Patrol, pencatatan Safety Behavior Observation, serta manajemen Master Data pendukung secara digital.
+              Portal manajemen terintegrasi untuk menangani MS-HSSE ( Managemen System Health, Safety, Security, and Environment ) di lingkungan kerja PT. Industri Nabati Lestari. Memfasilitasi penerbitan surat izin kerja (Permit to Work), pemantauan Safety Patrol, pencatatan Safety Behavior Observation, serta manajemen Master Data pendukung secara digital.
             </p>
           </div>
 

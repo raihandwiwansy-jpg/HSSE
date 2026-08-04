@@ -92,7 +92,7 @@ export default function LandingPage() {
               </div>
               <div>
                 <h1 className="text-xs sm:text-base font-bold text-gray-900 dark:text-white leading-tight uppercase">PT. INDUSTRI NABATI LESTARI</h1>
-                <p className="text-[9px] sm:text-[10px] text-green-600 dark:text-green-400 font-semibold tracking-wider">HSE PERFORMANCE BOARD</p>
+                <p className="text-[9px] sm:text-[10px] text-green-600 dark:text-green-400 font-semibold tracking-wider">MS-HSSE PERFORMANCE BOARD</p>
               </div>
             </div>
             <Link href="/login" className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-all shadow-sm">
@@ -110,7 +110,7 @@ export default function LandingPage() {
             Papan Informasi Keselamatan Kerja
           </h2>
           <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-            Sistem Pemantauan Terpadu Kesehatan, Keselamatan Kerja & Lingkungan (HSSE) PT. Industri Nabati Lestari
+            Sistem Pemantauan Terpadu MS-HSSE ( Managemen System Health, Safety, Security, and Environment ) PT. Industri Nabati Lestari
           </p>
         </div>
 

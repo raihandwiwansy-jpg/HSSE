@@ -151,7 +151,7 @@ export default function ForgotPasswordPage() {
               PT. Industri Nabati Lestari
             </h2>
             <p className={`text-xs sm:text-sm mt-1.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-              Lupa password akun HSSE Anda
+              Lupa password akun MS-HSSE Anda
             </p>
           </div>
 

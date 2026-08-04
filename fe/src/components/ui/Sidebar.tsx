@@ -131,7 +131,7 @@ export default function Sidebar({ children }: { children?: React.ReactNode }) {
             {!isCollapsed && (
               <div className="min-w-0">
                 <h2 className="text-xs font-bold tracking-wide text-gray-900 dark:text-white leading-tight truncate">PT. INL</h2>
-                <p className="text-[10px] font-semibold text-blue-600 dark:text-blue-400 tracking-wider uppercase mt-0.5">HSSE SYSTEM</p>
+                <p className="text-[10px] font-semibold text-blue-600 dark:text-blue-400 tracking-wider uppercase mt-0.5">MS-HSSE SYSTEM</p>
               </div>
             )}
           </div>
