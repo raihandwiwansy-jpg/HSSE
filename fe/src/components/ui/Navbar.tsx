@@ -123,7 +123,7 @@ export default function Navbar() {
             onClick={() => setDropdownOpen(!dropdownOpen)}
             className="flex items-center gap-1 sm:gap-2 px-1.5 sm:px-3 py-1.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors shrink-0"
           >
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center shadow-sm overflow-hidden border border-gray-300 dark:border-gray-600 shrink-0">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-blue-600 dark:bg-blue-700 flex items-center justify-center shadow-sm overflow-hidden border border-gray-300 dark:border-gray-600 shrink-0">
               {displayPhoto ? (
                 <img src={displayPhoto} alt={user?.name} className="w-full h-full object-cover" />
               ) : (
@@ -144,7 +144,7 @@ export default function Navbar() {
             <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 animate-fade-in overflow-hidden">
               <div className="px-4 pt-4 pb-3 border-b border-gray-100 dark:border-gray-700">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center shrink-0 overflow-hidden">
+                  <div className="w-12 h-12 rounded-full bg-blue-600 dark:bg-blue-700 flex items-center justify-center shrink-0 overflow-hidden">
                     {displayPhoto ? (
                       <img src={displayPhoto} alt={user?.name} className="w-full h-full object-cover" />
                     ) : (

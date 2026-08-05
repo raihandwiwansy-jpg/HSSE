@@ -116,9 +116,7 @@ export default function ProfilePage() {
       <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
         
         {/* Cover solid */}
-        <div className="h-24 bg-blue-600 relative">
-          <div className="absolute inset-0 bg-black/10" />
-        </div>
+        <div className="h-24 bg-blue-600 relative" />
 
         {/* Avatar + Info */}
         <div className="px-6 pb-6">
