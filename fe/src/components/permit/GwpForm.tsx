@@ -3,8 +3,6 @@
 import { useEffect } from 'react';
 import { getNextSequence } from '@/lib/api/permit';
 import Input from '@/components/ui/Input';
-import Checkbox from '@/components/ui/Checkbox';
-import RadioGroup from '@/components/ui/RadioGroup';
 import MasterSelect from '@/components/ui/MasterSelect';
 import DynamicFields from './DynamicFields';
 import PermitApprovalTable from './PermitApprovalTable';
@@ -118,34 +116,8 @@ export default function GwpForm({ data, onChange }: GwpFormProps) {
         </div>
       </Section>
 
-      {/* Section C */}
-      <Section title="SECTION C: Kategori Resiko Pekerjaan">
-        <div className="space-y-3">
-          <p className="text-[11px] text-gray-500 dark:text-gray-400">Berdasarkan Job Safety Analysis (JSA)</p>
-          <Checkbox
-            checked={(data.jsa_dilakukan as boolean) || false}
-            onChange={(checked) => update('jsa_dilakukan', checked)}
-            label="JSA dilakukan sebelum izin kerja dikeluarkan"
-            size="md"
-          />
-          <div className="space-y-1.5">
-            <p className="text-[11px] text-gray-500 dark:text-gray-400">Penilaian tingkat resiko oleh pemohon izin, diverifikasi oleh HSSE</p>
-            <RadioGroup
-              name="kategori_risiko"
-              options={[
-                { value: 'rendah', label: 'Rendah' },
-                { value: 'sedang', label: 'Sedang' },
-                { value: 'tinggi', label: 'Tinggi' },
-              ]}
-              value={(data.kategori_risiko as string) || ''}
-              onChange={(v) => update('kategori_risiko', v)}
-            />
-          </div>
-        </div>
-      </Section>
-
-      {/* Section D - Daftar Keselamatan (Two-Column Table Layout) */}
-      <Section title="SECTION D: Daftar Keselamatan">
+      {/* Section C - Daftar Keselamatan (Two-Column Table Layout) */}
+      <Section title="SECTION C: Daftar Keselamatan">
         <div className="overflow-x-auto">
           <table className="w-full text-xs border border-gray-300 dark:border-gray-600">
             <thead>
@@ -196,8 +168,8 @@ export default function GwpForm({ data, onChange }: GwpFormProps) {
         </div>
       </Section>
 
-      {/* Section E - Peralatan Keamanan (PPE Grid) */}
-      <Section title="SECTION E: Peralatan Keamanan (APD)">
+      {/* Section D - Peralatan Keamanan (PPE Grid) */}
+      <Section title="SECTION D: Peralatan Keamanan (APD)">
         <div className="overflow-x-auto">
           <table className="w-full text-xs border border-gray-300 dark:border-gray-600">
             <thead>
@@ -244,8 +216,8 @@ export default function GwpForm({ data, onChange }: GwpFormProps) {
         </div>
       </Section>
 
-      {/* Section F - Persetujuan Izin (4-Role Approval Table) */}
-      <Section title="SECTION F: Persetujuan Izin">
+      {/* Section E - Persetujuan Izin (4-Role Approval Table) */}
+      <Section title="SECTION E: Persetujuan Izin">
         <PermitApprovalTable
           data={data}
           update={update}
@@ -294,7 +266,7 @@ export default function GwpForm({ data, onChange }: GwpFormProps) {
         onChange={onChange}
         hardcodedFields={[
           'tanggal','pukul_mulai','pukul_selesai','departemen','lokasi','nomor_gwp',
-          'deskripsi_pekerjaan','peralatan','jsa_dilakukan','kategori_risiko',
+          'deskripsi_pekerjaan','peralatan',
           'checklist_pemohon','checklist_hse','ppe_checklist',
           'persetujuan_pemohon_tanggal','persetujuan_pemohon_nama','persetujuan_pemohon_jabatan','persetujuan_pemohon_paraf',
           'persetujuan_pemilik_lokasi_tanggal','persetujuan_pemilik_lokasi_nama','persetujuan_pemilik_lokasi_jabatan','persetujuan_pemilik_lokasi_paraf',
@@ -312,8 +284,8 @@ export default function GwpForm({ data, onChange }: GwpFormProps) {
         ]}
       />
 
-      {/* Section G - Validasi Ulang (Shift Table) */}
-      <Section title="SECTION G: Validasi Ulang">
+      {/* Section F - Validasi Ulang (Shift Table) */}
+      <Section title="SECTION F: Validasi Ulang">
         <p className="text-[11px] text-gray-500 dark:text-gray-400 mb-2 italic">Penilaian pada awal shift kerja berikutnya - Izin kerja Umum hanya berlaku 1 hari (3 shift)</p>
         <div className="overflow-x-auto">
           <table className="w-full text-[11px] border border-gray-300 dark:border-gray-600">

@@ -103,178 +103,197 @@ export default function ProfilePage() {
 
   const displayPhoto = photoUrl;
   const roleColor = user.role === 'admin'
-    ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400'
+    ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-800'
     : user.role === 'supervisor'
-    ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
-    : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400';
+    ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800'
+    : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800';
 
-  const roleLabel = user.role === 'admin' ? 'Admin' : user.role === 'supervisor' ? 'Supervisor' : 'User';
+  const roleLabel = user.role === 'admin' ? 'Admin HSE' : user.role === 'supervisor' ? 'Supervisor' : 'User (Karyawan)';
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-6 space-y-5 animate-fade-in-up">
-      {/* Profile Card */}
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
-        
-        {/* Cover solid */}
-        <div className="h-24 bg-blue-600 relative" />
-
-        {/* Avatar + Info */}
-        <div className="px-6 pb-6">
-          {/* Avatar (overlapping cover) */}
-          <div className="relative -mt-12 mb-3 flex justify-center sm:justify-start">
-            <div className="relative">
-              <button
-                onClick={handleFotoClick}
-                disabled={uploading}
-                className="group relative w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-4 border-white dark:border-gray-800 shadow-lg block hover:opacity-90 transition-opacity disabled:opacity-60 bg-gray-100 dark:bg-gray-700"
-              >
-                {displayPhoto ? (
-                  <img src={displayPhoto} alt={user.name} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-blue-600">
-                    <span className="text-3xl sm:text-4xl font-bold text-white">{user.name?.charAt(0)?.toUpperCase() || 'U'}</span>
-                  </div>
-                )}
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Camera size={22} className="text-white" />
-                </div>
-              </button>
-              {/* Camera badge */}
-              <button
-                onClick={handleFotoClick}
-                disabled={uploading}
-                className="absolute bottom-0 right-0 w-7 h-7 bg-blue-500 hover:bg-blue-600 rounded-full flex items-center justify-center border-2 border-white dark:border-gray-800 shadow transition-colors disabled:opacity-50"
-              >
-                {uploading ? (
-                  <div className="w-3 h-3 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <Camera size={13} className="text-white" />
-                )}
-              </button>
-              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFotoChange} />
-            </div>
-          </div>
-
-          {/* Name & Role */}
-          <div className="text-center sm:text-left">
-            {editing ? (
-              <input
-                type="text"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="text-lg font-bold text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-1.5 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
-              />
-            ) : (
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">{user.name}</h2>
-            )}
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{user.email}</p>
-            <div className="mt-2 flex flex-wrap gap-2 justify-center sm:justify-start">
-              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold capitalize ${roleColor}`}>
-                <Shield size={11} />
-                {roleLabel}
-              </span>
-              {user.departemen && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
-                  <Building2 size={11} />
-                  {user.departemen}
-                </span>
-              )}
-            </div>
-          </div>
+    <div className="max-w-4xl mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-4 animate-fade-in-up">
+      {/* Header Title */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Profil Pengguna</h1>
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+            Kelola informasi data diri dan akun MS-HSSE Anda
+          </p>
         </div>
+        {!editing && (
+          <button
+            onClick={() => setEditing(true)}
+            className="flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/40 border border-blue-200 dark:border-blue-800/60 rounded-xl transition-all shadow-sm active:scale-95"
+          >
+            <Edit2 size={14} />
+            <span>Edit Profil</span>
+          </button>
+        )}
       </div>
 
-      {/* Info Card */}
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-5 space-y-1">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200">Informasi Akun</h3>
-          {!editing && (
+      {/* Main Profile Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+        {/* Left Column: Avatar & Summary Card */}
+        <div className="md:col-span-5 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5 sm:p-6 flex flex-col items-center text-center justify-center shadow-sm">
+          {/* Avatar Upload */}
+          <div className="relative mb-4">
             <button
-              onClick={() => setEditing(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-lg transition-colors"
+              onClick={handleFotoClick}
+              disabled={uploading}
+              className="group relative w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-2 border-gray-200 dark:border-gray-700 shadow-md block hover:opacity-95 transition-all disabled:opacity-60 bg-gray-100 dark:bg-gray-800"
+              title="Klik untuk ubah foto"
             >
-              <Edit2 size={13} />
-              Edit
+              {displayPhoto ? (
+                <img src={displayPhoto} alt={user.name} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-[#1A365D] text-white">
+                  <span className="text-3xl sm:text-4xl font-bold">{user.name?.charAt(0)?.toUpperCase() || 'U'}</span>
+                </div>
+              )}
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <Camera size={22} className="text-white" />
+              </div>
             </button>
-          )}
-        </div>
 
-        {/* Email */}
-        <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-          <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
-            <Mail size={15} className="text-blue-600 dark:text-blue-400" />
+            {/* Camera badge */}
+            <button
+              onClick={handleFotoClick}
+              disabled={uploading}
+              className="absolute bottom-0 right-0 w-8 h-8 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center border-2 border-white dark:border-gray-900 shadow-md transition-all disabled:opacity-50 active:scale-90"
+              title="Ubah Foto"
+            >
+              {uploading ? (
+                <div className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+              ) : (
+                <Camera size={14} />
+              )}
+            </button>
+            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFotoChange} />
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-[10px] text-gray-400 uppercase tracking-wide font-medium">Email</p>
-            <p className="text-sm text-gray-800 dark:text-white truncate">{user.email}</p>
-          </div>
-        </div>
 
-        {/* Departemen */}
-        <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-          <div className="w-8 h-8 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center shrink-0">
-            <Building2 size={15} className="text-violet-600 dark:text-violet-400" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-[10px] text-gray-400 uppercase tracking-wide font-medium">Departemen</p>
-            <p className="text-sm text-gray-800 dark:text-white">{user.departemen || '-'}</p>
-          </div>
-        </div>
-
-        {/* Role */}
-        <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-          <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center shrink-0">
-            <Shield size={15} className="text-amber-600 dark:text-amber-400" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-[10px] text-gray-400 uppercase tracking-wide font-medium">Peran</p>
-            <p className="text-sm text-gray-800 dark:text-white capitalize">{user.role}</p>
-          </div>
-        </div>
-
-        {/* No HP */}
-        <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-          <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center shrink-0">
-            <Phone size={15} className="text-green-600 dark:text-green-400" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-[10px] text-gray-400 uppercase tracking-wide font-medium">No. HP</p>
+          {/* User Name & Email */}
+          <div className="w-full">
             {editing ? (
-              <input
-                type="text"
-                value={form.no_hp}
-                onChange={(e) => setForm({ ...form, no_hp: e.target.value })}
-                className="text-sm text-gray-800 dark:text-white bg-white dark:bg-gray-600 border border-gray-200 dark:border-gray-500 rounded-md px-2 py-1 w-full mt-0.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                placeholder="Belum diisi"
-              />
+              <div className="mb-2">
+                <label className="block text-[11px] font-semibold text-left text-gray-500 dark:text-gray-400 mb-1">Nama Lengkap</label>
+                <input
+                  type="text"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  className="text-sm font-bold text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Nama Lengkap"
+                />
+              </div>
             ) : (
-              <p className="text-sm text-gray-800 dark:text-white">{user.no_hp || '-'}</p>
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate">{user.name}</h2>
+            )}
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">{user.email}</p>
+          </div>
+
+          {/* Badges */}
+          <div className="mt-3.5 flex flex-wrap gap-2 justify-center">
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${roleColor}`}>
+              <Shield size={12} />
+              {roleLabel}
+            </span>
+            {user.departemen && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
+                <Building2 size={12} />
+                {user.departemen}
+              </span>
             )}
           </div>
         </div>
 
-        {/* Edit Actions */}
-        {editing && (
-          <div className="flex gap-2 pt-3">
-            <button
-              onClick={handleSaveProfile}
-              disabled={saving}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-50"
-            >
-              <Save size={15} />
-              {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
-            </button>
-            <button
-              onClick={() => {
-                setEditing(false);
-                setForm({ name: user.name, no_hp: user.no_hp || '' });
-              }}
-              className="px-4 py-2.5 text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-            >
-              Batal
-            </button>
+        {/* Right Column: Account Details */}
+        <div className="md:col-span-7 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5 sm:p-6 flex flex-col justify-between shadow-sm">
+          <div>
+            <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100 uppercase tracking-wider mb-4 pb-2 border-b border-gray-100 dark:border-gray-800">
+              Informasi Akun
+            </h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Email */}
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-800">
+                <div className="w-9 h-9 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
+                  <Mail size={16} className="text-blue-600 dark:text-blue-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] text-gray-400 uppercase tracking-wide font-semibold">Email</p>
+                  <p className="text-xs sm:text-sm font-medium text-gray-800 dark:text-white truncate" title={user.email}>{user.email}</p>
+                </div>
+              </div>
+
+              {/* Departemen */}
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-800">
+                <div className="w-9 h-9 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center shrink-0">
+                  <Building2 size={16} className="text-violet-600 dark:text-violet-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] text-gray-400 uppercase tracking-wide font-semibold">Departemen</p>
+                  <p className="text-xs sm:text-sm font-medium text-gray-800 dark:text-white">{user.departemen || '-'}</p>
+                </div>
+              </div>
+
+              {/* Role */}
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-800">
+                <div className="w-9 h-9 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center shrink-0">
+                  <Shield size={16} className="text-amber-600 dark:text-amber-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] text-gray-400 uppercase tracking-wide font-semibold">Peran Sistem</p>
+                  <p className="text-xs sm:text-sm font-medium text-gray-800 dark:text-white capitalize">{user.role}</p>
+                </div>
+              </div>
+
+              {/* No HP */}
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-800">
+                <div className="w-9 h-9 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shrink-0">
+                  <Phone size={16} className="text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] text-gray-400 uppercase tracking-wide font-semibold">No. HP / Telepon</p>
+                  {editing ? (
+                    <input
+                      type="text"
+                      value={form.no_hp}
+                      onChange={(e) => setForm({ ...form, no_hp: e.target.value })}
+                      className="text-xs sm:text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-2 py-1 w-full mt-0.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      placeholder="08xxxxxxxxxx"
+                    />
+                  ) : (
+                    <p className="text-xs sm:text-sm font-medium text-gray-800 dark:text-white">{user.no_hp || '-'}</p>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
-        )}
+
+          {/* Edit Actions */}
+          {editing && (
+            <div className="flex items-center justify-end gap-2.5 pt-4 mt-4 border-t border-gray-100 dark:border-gray-800">
+              <button
+                type="button"
+                onClick={() => {
+                  setEditing(false);
+                  setForm({ name: user.name, no_hp: user.no_hp || '' });
+                }}
+                className="px-4 py-2 text-xs sm:text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveProfile}
+                disabled={saving}
+                className="flex items-center justify-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold rounded-xl transition-all shadow-sm disabled:opacity-50"
+              >
+                <Save size={14} />
+                <span>{saving ? 'Menyimpan...' : 'Simpan Perubahan'}</span>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

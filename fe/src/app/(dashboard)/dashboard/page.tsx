@@ -4,12 +4,13 @@ import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { getDashboardRoleData } from '@/lib/api/dashboard';
+import { getHseKpiData } from '@/lib/api/hseKpi';
 import {
   Shield, AlertTriangle, FileText, Flame, Lock, CheckCircle2,
   Users, Activity, Eye, ClipboardCheck, BarChart3, ChevronRight,
   TrendingUp, Award, Clock, ArrowRight, Zap, Trophy, ShieldAlert,
   Calendar, CheckSquare, Plus, ArrowUpRight, HelpCircle, RefreshCw,
-  Play, BookOpen, X
+  Play, BookOpen, X, Target
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -40,6 +41,7 @@ export default function DashboardPage() {
   const role = user?.role || 'user';
   const [isMounted, setIsMounted] = useState(false);
   const [activePhoto, setActivePhoto] = useState(0);
+  const [kpiYear, setKpiYear] = useState(new Date().getFullYear());
   const carouselTimer = useRef<NodeJS.Timeout | null>(null);
 
   const photos = [
@@ -71,7 +73,7 @@ export default function DashboardPage() {
     }
   };
 
-  const { data: roleDataRes, refetch: refetchRoleData, isFetching } = useQuery({
+  const { data: roleDataRes, refetch: refetchRoleData, isFetching: isRoleFetching } = useQuery({
     queryKey: ['dashboard-role-data'],
     queryFn: async () => {
       const res = await getDashboardRoleData();
@@ -81,11 +83,57 @@ export default function DashboardPage() {
     staleTime: 5000,
   });
 
+  const { data: kpiRes, refetch: refetchKpi, isFetching: isKpiFetching } = useQuery({
+    queryKey: ['dashboard-hse-kpi', kpiYear],
+    queryFn: () => getHseKpiData(kpiYear),
+    refetchInterval: 10000,
+    staleTime: 5000,
+  });
+
   const handleRefresh = () => {
     refetchRoleData();
+    refetchKpi();
   };
 
+  const isFetching = isRoleFetching || isKpiFetching;
   const rd = roleDataRes;
+  const kpiData = kpiRes?.data;
+  const yearCum = kpiData?.year_cumulative;
+  const monthsKpi = kpiData?.months || [];
+
+  const totalLeadingKpi = yearCum
+    ? (yearCum.hse_toolbox_meeting || 0) +
+      (yearCum.hse_joint_safety_patrol || 0) +
+      (yearCum.behavior_based_safe || 0) +
+      (yearCum.hse_training || 0) +
+      (yearCum.hse_induction || 0) +
+      (yearCum.general_safety_talk || 0) +
+      (yearCum.hse_management_visit || 0) +
+      (yearCum.emergency_drill || 0) +
+      (yearCum.equipment_inspection || 0) +
+      (yearCum.hse_meeting || 0)
+    : 0;
+
+  const totalLaggingIncidents = yearCum
+    ? (yearCum.fatality || 0) + (yearCum.lti || 0) + (yearCum.rwdc || 0) + (yearCum.mtc || 0) + (yearCum.fac || 0)
+    : 0;
+
+  const kpiTrendChartData = monthsKpi.map((m: any) => ({
+    month: m.month,
+    toolbox: m.hse_toolbox_meeting || 0,
+    patrol: m.hse_joint_safety_patrol || 0,
+    bbs: m.behavior_based_safe || 0,
+    training: (m.hse_training || 0) + (m.hse_induction || 0),
+  }));
+
+  const kpiComparisonData = [
+    { name: 'Toolbox Meeting', value: yearCum?.hse_toolbox_meeting || 0, color: '#3b82f6' },
+    { name: 'Behavior Safe (BBS)', value: yearCum?.behavior_based_safe || 0, color: '#10b981' },
+    { name: 'Joint Patrol', value: yearCum?.hse_joint_safety_patrol || 0, color: '#8b5cf6' },
+    { name: 'Training & Induksi', value: (yearCum?.hse_training || 0) + (yearCum?.hse_induction || 0), color: '#f59e0b' },
+    { name: 'Inspeksi Alat', value: yearCum?.equipment_inspection || 0, color: '#06b6d4' },
+    { name: 'Safety Talk & Mtg', value: (yearCum?.general_safety_talk || 0) + (yearCum?.hse_meeting || 0), color: '#ec4899' },
+  ];
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-fade-in-up pb-10">
@@ -317,7 +365,226 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Charts Grid */}
+          {/* ==================== 4. HSSE KPI PERFORMANCE REAL-TIME SECTION ==================== */}
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl p-5 sm:p-7 shadow-sm space-y-6">
+            
+            {/* Widget Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100 dark:border-gray-800">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20 shrink-0">
+                  <BarChart3 size={20} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base sm:text-lg font-bold text-gray-800 dark:text-white">
+                      HSSE KPI PERFORMANCE
+                    </h3>
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping inline-block" />
+                      Live Data
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    Monitoring indikator kinerja Leading & Lagging K3 real-time ({kpiYear})
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2.5 self-start sm:self-auto">
+                <select
+                  value={kpiYear}
+                  onChange={(e) => setKpiYear(parseInt(e.target.value))}
+                  className="px-3 py-1.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer"
+                >
+                  {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map((y) => (
+                    <option key={y} value={y}>{y}</option>
+                  ))}
+                </select>
+
+                {role === 'admin' && (
+                  <Link
+                    href="/hse-kpi-performance"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/30 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm"
+                  >
+                    <span>Input & Kelola KPI</span>
+                    <ArrowRight size={13} />
+                  </Link>
+                )}
+              </div>
+            </div>
+
+            {/* KPI Summary 4 Metric Cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <div className="p-3.5 sm:p-4 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/40 flex flex-col justify-between">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">Zero Accident Status</span>
+                  <Shield size={16} className="text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div className="text-lg sm:text-2xl font-black text-emerald-700 dark:text-emerald-300">
+                  {totalLaggingIncidents === 0 ? '100% AMAN' : `${totalLaggingIncidents} Kejadian`}
+                </div>
+                <p className="text-[10px] text-emerald-600/80 dark:text-emerald-400/80 mt-1">Fatality: {yearCum?.fatality || 0} • LTI: {yearCum?.lti || 0}</p>
+              </div>
+
+              <div className="p-3.5 sm:p-4 rounded-2xl bg-blue-50/70 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/40 flex flex-col justify-between">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[10px] font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wider">Program Leading K3</span>
+                  <TrendingUp size={16} className="text-blue-600 dark:text-blue-400" />
+                </div>
+                <div className="text-lg sm:text-2xl font-black text-blue-700 dark:text-blue-300">
+                  {totalLeadingKpi.toLocaleString()}
+                </div>
+                <p className="text-[10px] text-blue-600/80 dark:text-blue-400/80 mt-1">Total Kegiatan Preventif</p>
+              </div>
+
+              <div className="p-3.5 sm:p-4 rounded-2xl bg-purple-50/70 dark:bg-purple-950/20 border border-purple-100 dark:border-purple-900/40 flex flex-col justify-between">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[10px] font-bold text-purple-700 dark:text-purple-400 uppercase tracking-wider">Behavior Safe (BBS)</span>
+                  <Eye size={16} className="text-purple-600 dark:text-purple-400" />
+                </div>
+                <div className="text-lg sm:text-2xl font-black text-purple-700 dark:text-purple-300">
+                  {(yearCum?.behavior_based_safe || 0).toLocaleString()}
+                </div>
+                <p className="text-[10px] text-purple-600/80 dark:text-purple-400/80 mt-1">Observasi Perilaku Selamat</p>
+              </div>
+
+              <div className="p-3.5 sm:p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/40 flex flex-col justify-between">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[10px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider">Training & Induksi</span>
+                  <Award size={16} className="text-amber-600 dark:text-amber-400" />
+                </div>
+                <div className="text-lg sm:text-2xl font-black text-amber-700 dark:text-amber-300">
+                  {((yearCum?.hse_training || 0) + (yearCum?.hse_induction || 0)).toLocaleString()}
+                </div>
+                <p className="text-[10px] text-amber-600/80 dark:text-amber-400/80 mt-1">Peserta Edukasi Keselamatan</p>
+              </div>
+            </div>
+
+            {/* Charts: 2 Column Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* Chart A: Monthly Leading Indicators Trends */}
+              <div className="lg:col-span-7 bg-gray-50/50 dark:bg-gray-800/40 rounded-2xl p-4 sm:p-5 border border-gray-150 dark:border-gray-800 flex flex-col justify-between">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <h4 className="text-xs sm:text-sm font-bold text-gray-800 dark:text-white">
+                      Tren Bulanan Program Leading K3
+                    </h4>
+                    <p className="text-[11px] text-gray-400 mt-0.5">Toolbox Meeting, BBS, Patrol, dan Edukasi per bulan</p>
+                  </div>
+                  <span className="text-[10px] font-semibold text-gray-400 bg-white dark:bg-gray-800 px-2 py-1 rounded-md border border-gray-200 dark:border-gray-700">
+                    Tahun {kpiYear}
+                  </span>
+                </div>
+
+                <div className="h-64 sm:h-72 w-full">
+                  {isMounted && monthsKpi.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={kpiTrendChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
+                        <XAxis dataKey="month" stroke="#888888" fontSize={11} tickLine={false} />
+                        <YAxis stroke="#888888" fontSize={11} tickLine={false} />
+                        <Tooltip />
+                        <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ fontSize: '11px' }} />
+                        <Bar dataKey="toolbox" name="Toolbox Mtg" fill="#3b82f6" radius={[3, 3, 0, 0]} />
+                        <Bar dataKey="bbs" name="Behavior Safe" fill="#10b981" radius={[3, 3, 0, 0]} />
+                        <Bar dataKey="patrol" name="Joint Patrol" fill="#8b5cf6" radius={[3, 3, 0, 0]} />
+                        <Bar dataKey="training" name="Training/Induksi" fill="#f59e0b" radius={[3, 3, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="h-full flex items-center justify-center text-xs text-gray-400">
+                      Memuat grafik KPI...
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Chart B: Distribution & Cumulative Key Indicators */}
+              <div className="lg:col-span-5 bg-gray-50/50 dark:bg-gray-800/40 rounded-2xl p-4 sm:p-5 border border-gray-150 dark:border-gray-800 flex flex-col justify-between">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <h4 className="text-xs sm:text-sm font-bold text-gray-800 dark:text-white">
+                      Realisasi Program Terbanyak (YTD)
+                    </h4>
+                    <p className="text-[11px] text-gray-400 mt-0.5">Akumulasi kegiatan indikator K3 utama</p>
+                  </div>
+                  <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-1 rounded-md border border-emerald-200 dark:border-emerald-800/50">
+                    YTD Total
+                  </span>
+                </div>
+
+                <div className="h-64 sm:h-72 w-full">
+                  {isMounted && kpiComparisonData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={kpiComparisonData}
+                        layout="vertical"
+                        margin={{ top: 10, right: 25, left: 15, bottom: 0 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
+                        <XAxis type="number" stroke="#888888" fontSize={11} tickLine={false} />
+                        <YAxis dataKey="name" type="category" stroke="#888888" fontSize={10} width={95} tickLine={false} />
+                        <Tooltip formatter={(val) => [`${val} Kegiatan`, 'Realisasi YTD']} />
+                        <Bar dataKey="value" name="Realisasi YTD" radius={[0, 4, 4, 0]}>
+                          {kpiComparisonData.map((entry, index) => (
+                            <Cell key={`cell-kpi-${index}`} fill={entry.color} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="h-full flex items-center justify-center text-xs text-gray-400">
+                      Memuat data akumulasi...
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Lagging Indicators Record Summary Bar */}
+            <div className="pt-1">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Matriks Lagging Indicators (Target Kinerja 0 Insiden)
+                </span>
+                <span className="text-[10px] text-gray-400">Target vs Realisasi YTD</span>
+              </div>
+              <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-2">
+                {[
+                  { key: 'Fatality', val: yearCum?.fatality || 0, target: 0 },
+                  { key: 'LTI', val: yearCum?.lti || 0, target: 0 },
+                  { key: 'RWDC', val: yearCum?.rwdc || 0, target: 0 },
+                  { key: 'MTC', val: yearCum?.mtc || 0, target: 0 },
+                  { key: 'FAC', val: yearCum?.fac || 0, target: 0 },
+                  { key: 'Near Miss', val: yearCum?.near_miss || 0, target: 3 },
+                  { key: 'Env Incident', val: yearCum?.environmental_incident || 0, target: 0 },
+                  { key: 'Prop Damage', val: yearCum?.property_damage || 0, target: 0 },
+                  { key: 'Complaint', val: yearCum?.customer_formal_complaint || 0, target: 5 },
+                ].map((item, idx) => {
+                  const isSafe = item.val <= item.target;
+                  return (
+                    <div
+                      key={idx}
+                      className={`p-2 rounded-xl text-center border transition-all ${
+                        isSafe
+                          ? 'bg-gray-50 dark:bg-gray-800/60 border-gray-200 dark:border-gray-700/60'
+                          : 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800'
+                      }`}
+                    >
+                      <p className="text-[9px] font-semibold text-gray-400 truncate" title={item.key}>{item.key}</p>
+                      <p className={`text-sm font-black mt-0.5 ${isSafe ? 'text-gray-800 dark:text-white' : 'text-red-600 dark:text-red-400'}`}>
+                        {item.val}
+                      </p>
+                      <p className="text-[8px] text-gray-400">Tgt: {item.target}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+          </div>
+
+          {/* ==================== 5. OPERATIONAL CHARTS GRID ==================== */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             {/* Incident Summary */}
