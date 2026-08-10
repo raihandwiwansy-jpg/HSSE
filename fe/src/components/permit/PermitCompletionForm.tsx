@@ -4,7 +4,7 @@ import Checkbox from '@/components/ui/Checkbox';
 import RadioGroup from '@/components/ui/RadioGroup';
 import Button from '@/components/ui/Button';
 import { PermitJenis } from '@/types';
-import { CircleCheck, Lock } from 'lucide-react';
+import { CircleCheck, Lock, X } from 'lucide-react';
 
 interface PermitCompletionFormProps {
   jenis: PermitJenis;
@@ -14,6 +14,7 @@ interface PermitCompletionFormProps {
   onSubmit: (mergedData: Record<string, unknown>) => void;
   isPending: boolean;
   onSubmitRole?: (role: string) => void;
+  onCancel?: () => void;
 }
 
 const GWP_STATEMENTS = {
@@ -80,7 +81,7 @@ const COMPLETION_TITLES: Record<PermitJenis, string> = {
   whp: 'Penyelesaian Kerja',
 };
 
-export default function PermitCompletionForm({ jenis, userRole, completionData, onChange, onSubmit, isPending, onSubmitRole }: PermitCompletionFormProps) {
+export default function PermitCompletionForm({ jenis, userRole, completionData, onChange, onSubmit, isPending, onSubmitRole, onCancel }: PermitCompletionFormProps) {
   const u = (k: string, v: unknown) => onChange({ ...completionData, [k]: v });
   const stmt = STATEMENTS[jenis];
   const title = COMPLETION_TITLES[jenis];
@@ -212,15 +213,27 @@ export default function PermitCompletionForm({ jenis, userRole, completionData, 
   );
 
   return (
-    <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl p-4 sm:p-6 border-2 border-green-200 dark:border-green-800 space-y-4">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-green-500 text-white flex items-center justify-center shadow-lg shadow-green-500/30">
-          <CircleCheck size={20} />
+    <div id="completion-form-section" className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl p-4 sm:p-6 border-2 border-green-300 dark:border-green-800 space-y-4 shadow-sm scroll-mt-24 transition-all duration-300">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-green-500 text-white flex items-center justify-center shadow-lg shadow-green-500/30 shrink-0">
+            <CircleCheck size={20} />
+          </div>
+          <div>
+            <h3 className="font-bold text-gray-800 dark:text-white text-sm sm:text-base">{title}</h3>
+            <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Diisi oleh masing-masing role sesuai urutan</p>
+          </div>
         </div>
-        <div>
-          <h3 className="font-bold text-gray-800 dark:text-white text-sm sm:text-base">{title}</h3>
-          <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Diisi oleh masing-masing role sesuai urutan</p>
-        </div>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            title="Tutup Form"
+            className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5 rounded-lg transition-colors"
+          >
+            <X size={18} />
+          </button>
+        )}
       </div>
 
       {/* Status Summary */}
@@ -261,8 +274,8 @@ export default function PermitCompletionForm({ jenis, userRole, completionData, 
         </div>
       )}
 
-      {/* Submit Button */}
-      <div className="flex items-center gap-2 pt-2 border-t border-green-200 dark:border-green-800">
+      {/* Submit & Cancel Buttons */}
+      <div className="flex items-center justify-between gap-2 pt-2 border-t border-green-200 dark:border-green-800">
         <Button size="sm" onClick={() => {
           const prevRoleCompletion = (completionData.role_completion as Record<string, boolean>) || {};
           const roleCompletion = { ...prevRoleCompletion, [userRole]: true };
@@ -273,6 +286,11 @@ export default function PermitCompletionForm({ jenis, userRole, completionData, 
         }} isLoading={isPending}>
           <CircleCheck size={14} /> Kirim & Tandai Selesai
         </Button>
+        {onCancel && (
+          <Button variant="outline" size="sm" onClick={onCancel}>
+            Batal / Tutup
+          </Button>
+        )}
       </div>
     </div>
   );

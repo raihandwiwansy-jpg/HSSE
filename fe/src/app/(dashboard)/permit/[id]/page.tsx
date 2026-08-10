@@ -18,7 +18,7 @@ import Portal from '@/components/ui/Portal';
 const PermitPrintView = dynamic(() => import('@/components/permit/PermitPrintView'), { ssr: false });
 const JsaPrintView = dynamic(() => import('@/components/permit/JsaPrintView'), { ssr: false });
 import {
-  ArrowLeft, Edit, Send, CheckCircle, XCircle, Clock, FileText, MapPin, Calendar,
+  ArrowLeft, ArrowUp, Edit, Send, CheckCircle, XCircle, Clock, FileText, MapPin, Calendar,
   User, ClipboardList, Shield, AlertTriangle, PenTool, Stamp, CircleCheck,
   ClipboardCheck, Printer, X, Trash2, Activity
 } from 'lucide-react';
@@ -223,6 +223,35 @@ export default function PermitDetailPage() {
     setHseChecklist(prev => prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]);
   };
 
+  const handleOpenCompletionForm = () => {
+    setShowCompletionForm(true);
+    setTimeout(() => {
+      const el = document.getElementById('completion-form-section');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        el.classList.add('ring-4', 'ring-emerald-400/60', 'transition-all', 'duration-500');
+        setTimeout(() => {
+          el.classList.remove('ring-4', 'ring-emerald-400/60');
+        }, 2000);
+      }
+    }, 100);
+  };
+
+  const handleOpenApproval = (type: 'approve' | 'reject') => {
+    setActType(type);
+    setShowCatatan(true);
+    setTimeout(() => {
+      const el = document.getElementById('approval-action-section');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        el.classList.add('ring-4', type === 'approve' ? 'ring-green-400/60' : 'ring-red-400/60', 'transition-all', 'duration-500');
+        setTimeout(() => {
+          el.classList.remove('ring-4', 'ring-green-400/60', 'ring-red-400/60');
+        }, 2000);
+      }
+    }, 100);
+  };
+
   if(isLoading) return (
     <div className="flex items-center justify-center min-h-[400px]">
       <WifiLoader text="Memuat detail izin..." />
@@ -336,7 +365,7 @@ export default function PermitDetailPage() {
 
       {/* Approval Action */}
       {showCatatan&&(
-        <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-2xl p-4 sm:p-5 border border-yellow-200 dark:border-yellow-800 space-y-3 animate-scale-in">
+        <div id="approval-action-section" className="bg-yellow-50 dark:bg-yellow-900/20 rounded-2xl p-4 sm:p-5 border border-yellow-200 dark:border-yellow-800 space-y-3 animate-scale-in scroll-mt-24 transition-all duration-300">
           <div className="flex items-center gap-2">
             {actType==='approve' ? <CheckCircle size={18} className="text-green-600"/> : <XCircle size={18} className="text-red-600"/>}
             <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">{actType==='approve'?'Persetujuan':'Alasan Penolakan'}</label>
@@ -408,6 +437,7 @@ export default function PermitDetailPage() {
           userRole={user?.role || 'user'}
           completionData={completionData}
           onChange={setCompletionData}
+          onCancel={() => setShowCompletionForm(false)}
           onSubmit={(mergedData) => {
             comMut.mutate({ id: p.id, d: mergedData });
           }}
@@ -527,7 +557,7 @@ export default function PermitDetailPage() {
       {Object.keys(det).length>0&&(
         <DetailCard title="Detail Data Permit" icon={<ClipboardList size={14} className="text-blue-500"/>}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {Object.entries(det).filter(([k])=>!['judul','lokasi','deskripsi','tanggal','pukul_mulai','pukul_selesai','departemen','jsa_id'].includes(k)).map(([k,v])=>{
+            {Object.entries(det).filter(([k])=>!['judul','lokasi','deskripsi','tanggal','pukul_mulai','pukul_selesai','departemen','jsa_id','jsa_tahapan'].includes(k)).map(([k,v])=>{
               if(v===null||v===undefined||v==='') return null;
               const label=k.replace(/_/g,' ').replace(/\b\w/g,l=>l.toUpperCase());
               let display=String(v);
@@ -547,6 +577,36 @@ export default function PermitDetailPage() {
                 </div>
               );
             })}
+          </div>
+        </DetailCard>
+      )}
+
+      {/* Structured JSA Steps if present */}
+      {Array.isArray(det.jsa_tahapan) && det.jsa_tahapan.length > 0 && (
+        <DetailCard title="Tahapan Analisis Keselamatan Kerja (JSA)" icon={<ClipboardCheck size={14} className="text-blue-500"/>}>
+          <div className="overflow-x-auto -mx-2 sm:mx-0">
+            <table className="w-full text-xs text-left border-collapse min-w-[550px]">
+              <thead>
+                <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60 text-gray-500 dark:text-gray-400 font-semibold uppercase text-[10px] tracking-wider">
+                  <th className="py-2.5 px-3 w-12 text-center">No</th>
+                  <th className="py-2.5 px-3">Tahapan Pekerjaan</th>
+                  <th className="py-2.5 px-3">Potensi Bahaya</th>
+                  <th className="py-2.5 px-3">Tindakan Pengendalian</th>
+                  <th className="py-2.5 px-3 w-28">PIC</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-150 dark:divide-gray-800 text-gray-700 dark:text-gray-300">
+                {det.jsa_tahapan.map((row: any, idx: number) => (
+                  <tr key={idx} className="hover:bg-gray-50/60 dark:hover:bg-gray-800/30 transition-colors">
+                    <td className="py-2.5 px-3 font-bold text-gray-400 text-center">{idx + 1}</td>
+                    <td className="py-2.5 px-3 font-semibold text-gray-800 dark:text-white">{row.tahapan_pekerjaan || row.tahapan || '-'}</td>
+                    <td className="py-2.5 px-3 text-red-600 dark:text-red-400 font-medium">{row.bahaya || row.potensi_bahaya || '-'}</td>
+                    <td className="py-2.5 px-3 text-green-700 dark:text-green-400 font-medium">{row.pengendalian || row.tindakan_pengendalian || '-'}</td>
+                    <td className="py-2.5 px-3 text-gray-600 dark:text-gray-400 font-medium">{row.penanggung_jawab || row.pic || '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </DetailCard>
       )}
@@ -600,13 +660,30 @@ export default function PermitDetailPage() {
       {/* Action Buttons (Moved to bottom) */}
       <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-800 flex items-center gap-2 justify-end flex-wrap">
         {canSub&&<Button size="sm" onClick={()=>subMut.mutate(p.id)} isLoading={subMut.isPending}><Send size={14}/> Submit ke Supervisor</Button>}
-        {canCom&&!showCompletionForm&&<Button size="sm" onClick={()=>setShowCompletionForm(true)}><CircleCheck size={14}/> Isi Form Selesai Kerja</Button>}
+        {canCom && !showCompletionForm && (
+          <Button size="sm" onClick={handleOpenCompletionForm} className="shadow-lg shadow-emerald-500/20 hover:scale-102 transition-transform">
+            <CircleCheck size={14}/> Isi Form Selesai Kerja
+          </Button>
+        )}
+        {canCom && showCompletionForm && (
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => {
+              const el = document.getElementById('completion-form-section');
+              el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }}>
+              <ArrowUp size={14}/> Ke Form Selesai Kerja
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setShowCompletionForm(false)} className="text-gray-500 hover:text-red-600 border-gray-300 dark:border-gray-700">
+              <X size={14}/> Tutup Form
+            </Button>
+          </div>
+        )}
         {!canConfirm&&p.status==='work_ready'&&user?.role==='admin'&&!allRolesDone&&<span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"><Clock size={14}/> Menunggu Sign-off Semua Pihak</span>}
         {canConfirm&&<Button variant="success" size="sm" onClick={()=>confirmComMut.mutate({id:p.id})} isLoading={confirmComMut.isPending}><CheckCircle size={14}/> Konfirmasi & Tutup Permit</Button>}
         {p.status==='completed'&&<span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"><CircleCheck size={14}/> Permit Selesai</span>}
         {(canSPV||canHSE)&&(<>
-          <Button variant="success" size="sm" onClick={()=>{setActType('approve');setShowCatatan(true);}}><CheckCircle size={14}/> Setujui</Button>
-          <Button variant="danger" size="sm" onClick={()=>{setActType('reject');setShowCatatan(true);}}><XCircle size={14}/> Tolak</Button>
+          <Button variant="success" size="sm" onClick={()=>handleOpenApproval('approve')}><CheckCircle size={14}/> Setujui</Button>
+          <Button variant="danger" size="sm" onClick={()=>handleOpenApproval('reject')}><XCircle size={14}/> Tolak</Button>
         </>)}
         {canEdit&&<Button variant="outline" size="sm" onClick={()=>router.push(`/permit/${p.id}/edit`)}><Edit size={14}/> Edit</Button>}
         {user?.role==='admin' && (
