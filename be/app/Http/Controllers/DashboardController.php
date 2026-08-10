@@ -266,54 +266,120 @@ class DashboardController extends Controller
     }
 
     /**
-     * Admin Dashboard — comprehensive aggregated data across ALL modules
+     * Helper to compute comprehensive metrics for a given period
+     * Periods supported: 'this_month', 'last_month', 'last_year', 'all_time'
      */
-    public function adminDashboard()
+    private function getDashboardMetricsForPeriod($periodType)
     {
-        $year = now()->year;
-        $month = now()->month;
+        $monthMap = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+        ];
 
-        // ========== PERMITS (unified) ==========
+        $targetYear = null;
+        $targetMonth = null;
+        $label = 'Semua Periode (Kumulatif)';
+
+        if ($periodType === 'this_month') {
+            $targetYear = (int) now()->year;
+            $targetMonth = (int) now()->month;
+            $label = 'Bulan Ini (' . $monthMap[$targetMonth] . ' ' . $targetYear . ')';
+        } elseif ($periodType === 'last_month') {
+            $lastMonthDate = now()->subMonth();
+            $targetYear = (int) $lastMonthDate->year;
+            $targetMonth = (int) $lastMonthDate->month;
+            $label = 'Bulan Kemarin (' . $monthMap[$targetMonth] . ' ' . $targetYear . ')';
+        } elseif ($periodType === 'last_year') {
+            $targetYear = (int) now()->subYear()->year;
+            $targetMonth = null;
+            $label = 'Tahun Kemarin (' . $targetYear . ')';
+        } else {
+            $periodType = 'all_time';
+        }
+
+        // ========== PERMITS ==========
         $permitsQuery = \App\Models\Permit::query();
+        if ($targetYear && $targetMonth) {
+            $permitsQuery->whereMonth('created_at', $targetMonth)->whereYear('created_at', $targetYear);
+        } elseif ($targetYear) {
+            $permitsQuery->whereYear('created_at', $targetYear);
+        }
         $permitsTotal = (clone $permitsQuery)->count();
         $permitsByStatus = (clone $permitsQuery)->select('status', DB::raw('count(*) as total'))->groupBy('status')->pluck('total', 'status');
-        $permitsThisMonth = (clone $permitsQuery)->whereMonth('created_at', $month)->whereYear('created_at', $year)->count();
         $permitsCompleted = (int) ($permitsByStatus['completed'] ?? 0);
 
         // ========== INSIDEN ==========
         $insidenQuery = Insiden::query();
+        if ($targetYear && $targetMonth) {
+            $insidenQuery->whereMonth('tanggal_kejadian', $targetMonth)->whereYear('tanggal_kejadian', $targetYear);
+        } elseif ($targetYear) {
+            $insidenQuery->whereYear('tanggal_kejadian', $targetYear);
+        }
         $insidenTotal = (clone $insidenQuery)->count();
         $insidenByJenis = (clone $insidenQuery)->select('jenis', DB::raw('count(*) as total'))->groupBy('jenis')->pluck('total', 'jenis');
         $insidenByStatus = (clone $insidenQuery)->select('status', DB::raw('count(*) as total'))->groupBy('status')->pluck('total', 'status');
-        $insidenThisMonth = (clone $insidenQuery)->whereMonth('tanggal_kejadian', $month)->whereYear('tanggal_kejadian', $year)->count();
+        
         $lastAccident = (clone $insidenQuery)->where('jenis', 'kecelakaan')->latest('tanggal_kejadian')->first();
-
-        $insidenPerBulan = (clone $insidenQuery)
-            ->select(DB::raw(DB::connection()->getDriverName() === 'pgsql' ? "TO_CHAR(tanggal_kejadian, 'YYYY-MM') as bulan" : "DATE_FORMAT(tanggal_kejadian, '%Y-%m') as bulan"), DB::raw('count(*) as total'))
-            ->where('tanggal_kejadian', '>=', now()->subMonths(12))
-            ->groupBy('bulan')->orderBy('bulan')->get();
+        if (!$lastAccident) {
+            $lastAccident = Insiden::where('jenis', 'kecelakaan')->latest('tanggal_kejadian')->first();
+        }
 
         // ========== SAFETY BEHAVIOR ==========
         $sbQuery = \App\Models\SafetyBehavior::query();
+        if ($targetYear && $targetMonth) {
+            $sbQuery->whereMonth('created_at', $targetMonth)->whereYear('created_at', $targetYear);
+        } elseif ($targetYear) {
+            $sbQuery->whereYear('created_at', $targetYear);
+        }
         $sbTotal = (clone $sbQuery)->count();
         $sbByStatus = (clone $sbQuery)->select('status', DB::raw('count(*) as total'))->groupBy('status')->pluck('total', 'status');
-        $sbThisMonth = (clone $sbQuery)->whereMonth('created_at', $month)->whereYear('created_at', $year)->count();
 
         // ========== SAFETY PATROL ==========
         $spQuery = \App\Models\SafetyPatrol::query();
+        if ($targetYear && $targetMonth) {
+            $spQuery->whereMonth('created_at', $targetMonth)->whereYear('created_at', $targetYear);
+        } elseif ($targetYear) {
+            $spQuery->whereYear('created_at', $targetYear);
+        }
         $spTotal = (clone $spQuery)->count();
         $spByStatus = (clone $spQuery)->select('status', DB::raw('count(*) as total'))->groupBy('status')->pluck('total', 'status');
-        $spThisMonth = (clone $spQuery)->whereMonth('created_at', $month)->whereYear('created_at', $year)->count();
 
-        // ========== MAN HOURS ==========
-        $totalSafeManhours = (float) \App\Models\MonthlyManHour::sum(DB::raw('(normal_jam_inl + normal_jam_kontraktor + normal_jam_outsourcing + overtime_inl + overtime_kontraktor + overtime_outsourcing) - cuti_sakit'));
-        $totalManpower = (int) \App\Models\MonthlyManHour::sum(DB::raw('manpower_inl + manpower_kontraktor + manpower_outsourcing'));
+        // ========== MAN HOURS & MANPOWER ==========
+        $totalSafeManhours = 0;
+        $totalManpower = 0;
+        $karyawanTotal = Karyawan::count();
+
+        if ($targetYear && $targetMonth) {
+            $monthName = $monthMap[$targetMonth];
+            $mmh = \App\Models\MonthlyManHour::where('tahun', (string) $targetYear)
+                ->where('bulan', $monthName)->first();
+            if ($mmh) {
+                $totalSafeManhours = (float) $mmh->jam_kerja_aman;
+                $totalManpower = (int) $mmh->total_manpower;
+            }
+        } elseif ($targetYear) {
+            $mmhRecords = \App\Models\MonthlyManHour::where('tahun', (string) $targetYear)->get();
+            if ($mmhRecords->count() > 0) {
+                $totalSafeManhours = (float) $mmhRecords->sum(function ($r) { return $r->jam_kerja_aman; });
+                $totalManpower = (int) round($mmhRecords->avg(function ($r) { return $r->total_manpower; }));
+            }
+        } else {
+            $totalSafeManhours = (float) \App\Models\MonthlyManHour::sum(DB::raw('(normal_jam_inl + normal_jam_kontraktor + normal_jam_outsourcing + overtime_inl + overtime_kontraktor + overtime_outsourcing) - cuti_sakit'));
+            $totalManpower = (int) \App\Models\MonthlyManHour::sum(DB::raw('manpower_inl + manpower_kontraktor + manpower_outsourcing'));
+        }
+
         if ($totalManpower === 0) {
-            $totalManpower = Karyawan::count();
+            $totalManpower = $karyawanTotal;
         }
 
         // ========== HSE KPI ==========
         $kpiQuery = \App\Models\HseKpiPerformance::query();
+        if ($targetYear && $targetMonth) {
+            $kpiQuery->whereMonth('period_start', $targetMonth)->whereYear('period_start', $targetYear);
+        } elseif ($targetYear) {
+            $kpiQuery->whereYear('period_start', $targetYear);
+        }
         $kpiTotalEntries = (clone $kpiQuery)->count();
         $kpiTotals = [
             'fatality' => (int) (clone $kpiQuery)->sum('fatality'),
@@ -343,14 +409,58 @@ class DashboardController extends Controller
             'audit_program_eksternal' => (int) (clone $kpiQuery)->sum('audit_program_eksternal'),
         ];
 
+        return [
+            'period' => $periodType,
+            'label' => $label,
+            'target_year' => $targetYear,
+            'target_month' => $targetMonth,
+            'total_safe_manhours' => $totalSafeManhours,
+            'total_manpower' => $totalManpower,
+            'total_permits' => $permitsTotal,
+            'permits_completed' => $permitsCompleted,
+            'permits_by_status' => $permitsByStatus,
+            'total_insiden' => $insidenTotal,
+            'insiden_by_jenis' => $insidenByJenis,
+            'insiden_by_status' => $insidenByStatus,
+            'last_accident_date' => $lastAccident?->tanggal_kejadian,
+            'total_safety_behavior' => $sbTotal,
+            'safety_behavior_by_status' => $sbByStatus,
+            'total_safety_patrol' => $spTotal,
+            'safety_patrol_by_status' => $spByStatus,
+            'total_karyawan' => $karyawanTotal,
+            'kpi_total_entries' => $kpiTotalEntries,
+            'kpi_totals' => $kpiTotals,
+        ];
+    }
+
+    /**
+     * Admin Dashboard — comprehensive aggregated data across ALL modules and periods
+     */
+    public function adminDashboard(Request $request)
+    {
+        $requestedPeriod = $request->query('period', 'all_time');
+
+        $periods = [
+            'this_month' => $this->getDashboardMetricsForPeriod('this_month'),
+            'last_month' => $this->getDashboardMetricsForPeriod('last_month'),
+            'last_year' => $this->getDashboardMetricsForPeriod('last_year'),
+            'all_time' => $this->getDashboardMetricsForPeriod('all_time'),
+        ];
+
+        $currentData = $periods[$requestedPeriod] ?? $periods['all_time'];
+
+        $insidenPerBulan = Insiden::select(
+            DB::raw(DB::connection()->getDriverName() === 'pgsql' ? "TO_CHAR(tanggal_kejadian, 'YYYY-MM') as bulan" : "DATE_FORMAT(tanggal_kejadian, '%Y-%m') as bulan"),
+            DB::raw('count(*) as total')
+        )
+        ->where('tanggal_kejadian', '>=', now()->subMonths(12))
+        ->groupBy('bulan')->orderBy('bulan')->get();
+
         // ========== USERS ==========
         $usersQuery = User::query();
         $usersTotal = (clone $usersQuery)->count();
         $usersByRole = (clone $usersQuery)->select('role', DB::raw('count(*) as total'))->groupBy('role')->pluck('total', 'role');
         $usersActive = (clone $usersQuery)->where('created_at', '>=', now()->subDays(30))->count();
-
-        // ========== EMPLOYEES (Karyawan) ==========
-        $karyawanTotal = Karyawan::count();
 
         // ========== RECENT ACTIVITIES ==========
         $recentPermits = \App\Models\Permit::with('user:id,name')->latest()->take(5)->get()->map(function ($p) {
@@ -369,43 +479,23 @@ class DashboardController extends Controller
         $recentActivities = collect([...$recentPermits, ...$recentInsiden, ...$recentSB, ...$recentSP])
             ->sortByDesc('time')->take(10)->values();
 
+        $responsePayload = array_merge($currentData, [
+            'periods' => $periods,
+            'active_period' => $requestedPeriod,
+            'insiden_this_month' => $periods['this_month']['total_insiden'],
+            'permits_this_month' => $periods['this_month']['total_permits'],
+            'safety_behavior_this_month' => $periods['this_month']['total_safety_behavior'],
+            'safety_patrol_this_month' => $periods['this_month']['total_safety_patrol'],
+            'insiden_per_bulan' => $insidenPerBulan,
+            'total_users' => $usersTotal,
+            'users_active_30d' => $usersActive,
+            'users_by_role' => $usersByRole,
+            'recent_activities' => $recentActivities,
+        ]);
+
         return response()->json([
             'success' => true,
-            'data' => [
-                // Overview
-                'total_safe_manhours' => $totalSafeManhours,
-                'total_manpower' => $totalManpower,
-                'total_permits' => $permitsTotal,
-                'permits_completed' => $permitsCompleted,
-                'permits_this_month' => $permitsThisMonth,
-                'permits_by_status' => $permitsByStatus,
-
-                'total_insiden' => $insidenTotal,
-                'insiden_this_month' => $insidenThisMonth,
-                'insiden_by_jenis' => $insidenByJenis,
-                'insiden_by_status' => $insidenByStatus,
-                'insiden_per_bulan' => $insidenPerBulan,
-                'last_accident_date' => $lastAccident?->tanggal_kejadian,
-
-                'total_safety_behavior' => $sbTotal,
-                'safety_behavior_this_month' => $sbThisMonth,
-                'safety_behavior_by_status' => $sbByStatus,
-
-                'total_safety_patrol' => $spTotal,
-                'safety_patrol_this_month' => $spThisMonth,
-                'safety_patrol_by_status' => $spByStatus,
-
-                'kpi_total_entries' => $kpiTotalEntries,
-                'kpi_totals' => $kpiTotals,
-
-                'total_users' => $usersTotal,
-                'users_active_30d' => $usersActive,
-                'users_by_role' => $usersByRole,
-
-                'total_karyawan' => $karyawanTotal,
-
-                'recent_activities' => $recentActivities,
-            ],
+            'data' => $responsePayload,
         ]);
     }
 
